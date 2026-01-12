@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Explore from './pages/Explore';
 import ShelfBuilder from './pages/ShelfBuilder';
@@ -10,12 +10,14 @@ import AdminThemes from './pages/admin/AdminThemes';
 import AdminModeration from './pages/admin/AdminModeration';
 import { useAppStore } from './main';
 import { LayoutGrid, Compass, Trophy, User, ShieldCheck, LogOut } from 'lucide-react';
+import './App.css';
 
 const Nav = () => {
   const { currentUser, logout } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
@@ -23,46 +25,30 @@ const Nav = () => {
     navigate('/');
   };
 
-  const handleRestrictedLink = (e, path) => {
-    if (!currentUser) {
-      e.preventDefault();
-      alert("Please log in to edit your shelf.");
-      navigate('/');
-    }
-  };
-
   return (
     <nav className="bottom-nav">
-      <Link to="/explore" className={isActive('/explore') ? 'active' : ''}>
+      <NavLink to="/explore" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Compass size={24} />
         <span>Explore</span>
-      </Link>
-      <Link to="/rankings" className={isActive('/rankings') ? 'active' : ''}>
+      </NavLink>
+      <NavLink to="/rankings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <Trophy size={24} />
         <span>Ranks</span>
-      </Link>
-      <Link
-        to="/shelf/me"
-        className={isActive('/shelf/me') ? 'active' : ''}
-        onClick={(e) => handleRestrictedLink(e, '/shelf/me')}
-      >
+      </NavLink>
+      <NavLink to="/shelf/me" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <LayoutGrid size={24} />
         <span>My Shelf</span>
-      </Link>
-      {currentUser?.role === 'admin' && (
-        <Link to="/admin" className={isActive('/admin') ? 'active' : ''}>
+      </NavLink>
+      {isAdmin && (
+        <NavLink to="/admin" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <ShieldCheck size={24} />
           <span>Admin</span>
-        </Link>
+        </NavLink>
       )}
-      {!currentUser ? (
-        <Link to="/" className={isActive('/') ? 'active' : ''}>
-          <User size={24} />
-          <span>Login</span>
-        </Link>
-      ) : (
-        <button onClick={handleLogout} className="logout-btn">
+      {currentUser && (
+        <button onClick={handleLogout} className="logout-btn-nav">
           <LogOut size={20} />
+          <span>Logout</span>
         </button>
       )}
     </nav>
@@ -71,12 +57,13 @@ const Nav = () => {
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { currentUser } = useAppStore();
+  const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
 
   if (!currentUser) {
     return <Navigate to="/" replace />;
   }
 
-  if (requireAdmin && currentUser.role !== 'admin') {
+  if (requireAdmin && !isAdmin) {
     return <Navigate to="/explore" replace />;
   }
 

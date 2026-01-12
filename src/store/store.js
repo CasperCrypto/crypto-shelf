@@ -30,8 +30,9 @@ export const useStore = () => {
     const loginWithX = () => {
         const mockUser = {
             id: 'user_demo_1',
-            username: 'casper',
-            avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=casper',
+            username: 'hermes',
+            handle: '@hermes',
+            avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=hermes',
             role: 'admin'
         };
         setCurrentUser(mockUser);
