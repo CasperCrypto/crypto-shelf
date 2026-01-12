@@ -1,0 +1,128 @@
+.picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.picker-drawer {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    border-radius: 40px 40px 0 0;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.picker-header h3 {
+    font-weight: 800;
+    font-size: 24px;
+}
+
+.picker-tabs {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.picker-tabs button {
+    white-space: nowrap;
+    padding: 8px 16px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.picker-tabs button.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 16px;
+    padding-top: 20px;
+}
+
+.accessory-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.accessory-card:hover {
+    transform: scale(1.05);
+}
+
+.image-wrapper,
+.image-placeholder {
+    width: 100px;
+    height: 100px;
+    background: var(--color-primary-soft);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-wrapper img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+}
+
+.rarity-tag {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    color: white;
+}
+
+.rarity-tag.common {
+    background: #88C0D0;
+}
+
+.rarity-tag.rare {
+    background: #EBCB8B;
+}
+
+.rarity-tag.legendary {
+    background: #BF616A;
+}
+
+.accessory-card span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}

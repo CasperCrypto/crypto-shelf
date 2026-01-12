@@ -1,0 +1,106 @@
+.explore-page {
+    padding-top: 40px;
+}
+
+.explore-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.explore-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.search-bar {
+    background: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-soft);
+    width: 100%;
+    max-width: 300px;
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-weight: 600;
+    width: 100%;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.filter-tabs button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: white;
+    border-radius: 30px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    box-shadow: var(--shadow-soft);
+    white-space: nowrap;
+}
+
+.filter-tabs button.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.shelves-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 32px;
+}
+
+.shelf-card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.shelf-card:hover {
+    transform: translateY(-8px);
+}
+
+.shelf-preview-mini {
+    transform: scale(0.9);
+    pointer-events: none;
+}
+
+.shelf-card-info {
+    margin-top: -20px;
+    margin-left: 20px;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+    font-weight: 800;
+    position: relative;
+    z-index: 10;
+}
+
+@media (max-width: 600px) {
+    .explore-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .search-bar {
+        max-width: 100%;
+    }
+}

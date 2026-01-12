@@ -1,0 +1,9 @@
+/* Inherits from AdminAccessories table styles, adds moderation specific tweaks */
+.admin-moderation .table-actions button {
+    background: var(--color-primary-soft);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

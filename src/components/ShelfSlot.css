@@ -1,0 +1,71 @@
+.shelf-slot {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shelf-slot:hover:not(.read-only) {
+    transform: translateY(-4px);
+}
+
+.slot-inner {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.item-image {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.empty .plus-icon {
+    color: rgba(0, 0, 0, 0.1);
+    transition: color 0.2s ease;
+}
+
+.empty:hover .plus-icon {
+    color: var(--color-primary);
+}
+
+.slot-base {
+    position: absolute;
+    bottom: 0;
+    left: 5%;
+    right: 5%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    filter: blur(2px);
+    z-index: 1;
+}
+
+.read-only {
+    cursor: default;
+}
+
+.filled .slot-inner {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
