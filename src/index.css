@@ -2,7 +2,7 @@
 
 :root {
   --font-main: 'Outfit', sans-serif;
-
+  
   /* Palette - Playful & Warm */
   --color-bg-primary: #FFF9F2;
   --color-primary: #6B4EE6;
@@ -11,20 +11,20 @@
   --color-accent: #FFC947;
   --color-text: #2D334A;
   --color-text-muted: #626B8A;
-
+  
   /* Gradients */
   --grad-morning: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%);
   --grad-sky: linear-gradient(135deg, #A1C4FD 0%, #C2E9FB 100%);
   --grad-mint: linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%);
   --grad-sunset: linear-gradient(135deg, #FA709A 0%, #FEE140 100%);
-
+  
   /* UI Atoms */
-  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.05);
+  --shadow-soft: 0 8px 30px rgba(0,0,0,0.05);
   --shadow-active: 0 12px 40px rgba(107, 78, 230, 0.2);
   --border-radius-lg: 24px;
   --border-radius-md: 16px;
   --border-radius-sm: 12px;
-
+  
   --cabinet-wood: #8B5E3C;
   --cabinet-inner: #D4B499;
 }
@@ -61,15 +61,8 @@ a {
 
 /* Animations */
 @keyframes pop-in {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .animate-pop {
@@ -80,42 +73,7 @@ a {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 16px;
-  /* Reduced for mobile */
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: 0 32px;
-  }
-}
-
-.responsive-grid {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 600px) {
-  .responsive-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .responsive-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.btn-full-mobile {
-  width: 100%;
-}
-
-@media (min-width: 600px) {
-  .btn-full-mobile {
-    width: auto;
-  }
+  padding: 0 20px;
 }
 
 .flex-center {
@@ -128,16 +86,13 @@ a {
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--color-primary-soft);
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }

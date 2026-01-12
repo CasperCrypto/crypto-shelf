@@ -37,98 +37,71 @@
     color: white;
 }
 
-.rankings-grid {
-    margin-top: 40px;
-}
-
-.ranking-card {
-    background: white;
-    padding: 24px;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-soft);
+.rankings-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    position: relative;
-    transition: transform 0.3s ease;
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.ranking-card:hover {
-    transform: translateY(-8px);
-}
-
-.rank-badge {
-    position: absolute;
-    top: -12px;
-    right: 24px;
-    background: var(--color-primary);
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.ranking-item {
+    background: white;
+    padding: 16px 24px;
+    border-radius: var(--border-radius-md);
     display: flex;
     align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s ease;
+}
+
+.ranking-item:hover {
+    transform: scale(1.02);
+}
+
+.rank-number {
+    width: 40px;
+    display: flex;
     justify-content: center;
     font-weight: 800;
-    box-shadow: 0 4px 15px rgba(107, 78, 230, 0.3);
-    z-index: 10;
-}
-
-.rank-1 .rank-badge {
-    background: var(--color-accent);
-}
-
-.rank-user {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.rank-user img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 3px solid var(--color-primary-soft);
-}
-
-.user-text h3 {
-    font-size: 18px;
-    font-weight: 800;
-}
-
-.user-text span {
-    font-size: 14px;
+    font-size: 20px;
     color: var(--color-text-muted);
 }
 
-.rank-preview {
-    width: 100%;
-    transform: scale(0.95);
-    pointer-events: none;
+.rank-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid var(--color-primary-soft);
 }
 
-.rank-footer {
-    display: flex;
-    justify-content: center;
+.rank-info {
+    flex: 1;
 }
 
-.score-badge {
+.rank-info h3 {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.rank-info span {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.rank-stats .stat {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: var(--color-bg-primary);
-    padding: 8px 16px;
-    border-radius: 20px;
+    gap: 6px;
     font-weight: 800;
     color: var(--color-text);
+    background: var(--color-bg-primary);
+    padding: 6px 12px;
+    border-radius: 20px;
 }
 
-@media (max-width: 600px) {
-    .rankings-header h1 {
-        font-size: 28px;
-    }
-
-    .ranking-card {
-        padding: 20px;
-    }
+.rank-1 {
+    border: 2px solid var(--color-accent);
 }

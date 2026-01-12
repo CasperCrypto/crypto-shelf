@@ -114,5 +114,3 @@ export const useStore = () => {
         reactions, addOrToggleReaction, getReactionsForShelf, getUserReactionsForShelf
     };
 };
-
-export default useStore;

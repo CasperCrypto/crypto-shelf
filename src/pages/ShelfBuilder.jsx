@@ -79,32 +79,30 @@ const ShelfBuilder = () => {
                         <p>Customize your 2x4 identity grid</p>
                     </div>
                 </div>
-                <button className="btn-save desktop-only" onClick={() => saveShelf(myShelf)}>
+                <button className="btn-save" onClick={() => saveShelf(myShelf)}>
                     <Save size={20} /> Save Changes
                 </button>
             </header>
 
             <div className="builder-layout">
                 <div className="shelf-column">
-                    <div className="shelf-sticky-container">
-                        <ShelfCabinet
-                            shelf={{ ...myShelf, theme: currentTheme }}
-                            accessories={accessories}
-                            onSlotClick={handleSlotClick}
-                        />
-                    </div>
+                    <ShelfCabinet
+                        shelf={{ ...myShelf, theme: currentTheme }}
+                        accessories={accessories}
+                        onSlotClick={handleSlotClick}
+                    />
                 </div>
 
                 <div className="controls-column">
                     <section className="control-section">
                         <h3><Palette size={20} /> Select Theme</h3>
-                        <div className="theme-scroll">
+                        <div className="theme-grid">
                             {themes.map(t => (
                                 <button
                                     key={t.id}
                                     className={`theme-card ${myShelf.themeId === t.id ? 'active' : ''}`}
                                     onClick={() => changeTheme(t.id)}
-                                    style={{ background: t.value }}
+                                    style={{ background: t.bgValue }}
                                 >
                                     <span>{t.name}</span>
                                 </button>
@@ -122,17 +120,10 @@ const ShelfBuilder = () => {
                         </div>
                     </section>
 
-                    <button className="btn-randomize btn-full-mobile" onClick={randomizeShelf}>
+                    <button className="btn-randomize" onClick={randomizeShelf}>
                         <Sparkles size={20} /> Randomize Items
                     </button>
                 </div>
-            </div>
-
-            {/* Sticky Mobile Bar */}
-            <div className="mobile-save-bar">
-                <button className="btn-save btn-full-mobile" onClick={() => saveShelf(myShelf)}>
-                    <Save size={20} /> Save Changes
-                </button>
             </div>
 
             <AccessoryPicker

@@ -35,16 +35,9 @@ const Explore = () => {
                 </button>
             </div>
 
-            <div className="shelves-grid responsive-grid">
+            <div className="shelves-grid">
                 {shelves.map(shelf => (
                     <div key={shelf.id} className="shelf-card" onClick={() => navigate(`/shelf/${shelf.id}`)}>
-                        <div className="shelf-card-header">
-                            <img src={shelf.user?.avatar} alt={shelf.user?.handle} />
-                            <div className="user-info">
-                                <span className="display-name">{shelf.user?.displayName}</span>
-                                <span className="handle">@{shelf.user?.handle}</span>
-                            </div>
-                        </div>
                         <div className="shelf-preview-mini">
                             <ShelfCabinet
                                 shelf={{ ...shelf, theme: getTheme(shelf.themeId) }}
@@ -52,7 +45,7 @@ const Explore = () => {
                                 readOnly={true}
                             />
                         </div>
-                        <div className="shelf-card-footer">
+                        <div className="shelf-card-info">
                             <div className="reactions-summary">
                                 <span>🔥 {getReactionCount(shelf.id)}</span>
                             </div>

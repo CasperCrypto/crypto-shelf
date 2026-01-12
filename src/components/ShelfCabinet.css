@@ -1,14 +1,16 @@
 .shelf-cabinet-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/5;
-    background: var(--color-bg-primary);
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px;
+    background: var(--theme-bg);
     border-radius: var(--border-radius-lg);
     overflow: hidden;
+    box-shadow: var(--shadow-soft);
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    box-shadow: var(--shadow-soft);
+    align-items: center;
 }
 
 .shelf-background {
@@ -27,7 +29,7 @@
     position: relative;
     z-index: 1;
     background: var(--cabinet-inner);
-    border: 12px solid var(--frame-color, var(--cabinet-wood));
+    border: 12px solid var(--cabinet-wood);
     border-radius: var(--border-radius-md);
     padding: 16px;
     width: 100%;
