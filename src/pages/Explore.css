@@ -61,36 +61,76 @@
 }
 
 .shelves-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 32px;
+    margin-top: 40px;
 }
 
 .shelf-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .shelf-card:hover {
-    transform: translateY(-8px);
+    transform: scale(1.03) rotateZ(1deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.shelf-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.shelf-card-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary-soft);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.display-name {
+    font-weight: 800;
+    color: var(--color-text);
+    font-size: 15px;
+}
+
+.handle {
+    font-size: 13px;
+    color: var(--color-text-muted);
 }
 
 .shelf-preview-mini {
-    transform: scale(0.9);
+    width: 100%;
     pointer-events: none;
+    transform: scale(1.05);
+    /* Make it feel fuller */
 }
 
-.shelf-card-info {
-    margin-top: -20px;
-    margin-left: 20px;
-    background: white;
+.shelf-card-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.reactions-summary {
+    background: var(--color-bg-primary);
     padding: 8px 16px;
     border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: fit-content;
     font-weight: 800;
-    position: relative;
-    z-index: 10;
+    font-size: 14px;
+    color: var(--color-text);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
 @media (max-width: 600px) {
@@ -102,5 +142,9 @@
 
     .search-bar {
         max-width: 100%;
+    }
+
+    .shelf-card {
+        padding: 16px;
     }
 }
