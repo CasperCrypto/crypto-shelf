@@ -76,10 +76,11 @@ export const useStore = () => {
     const loginWithX = async () => {
         if (!supabase) return alert("Auth disabled: Missing environment variables");
         await supabase.auth.signInWithOAuth({
-            provider: 'twitter',
+            provider: 'x', // Changed from 'twitter' as per user request
             options: { redirectTo: window.location.origin }
         });
     };
+
 
     const loginWithEmail = async (email) => {
         if (!supabase) return alert("Auth disabled: Missing environment variables");
