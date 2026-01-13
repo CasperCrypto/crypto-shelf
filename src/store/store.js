@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { INITIAL_ACCESSORIES, INITIAL_THEMES, MOCK_SHELVES, MOCK_USERS } from './initialData';
-import { supabase } from '../lib/supabaseClient';
 
 // Helper to load from localStorage
 const load = (key, defaultValue) => {
@@ -25,79 +24,9 @@ export const useStore = () => {
     useEffect(() => save('themes', themes), [themes]);
     useEffect(() => save('shelves', shelves), [shelves]);
     useEffect(() => save('reactions', reactions), [reactions]);
-    // Removed manual cryptoShelfUser persistence in favor of Supabase
 
-    // Auth logic
-    const mapUser = (user) => {
-        const email = user.email;
-        const descriptor = user.user_metadata?.preferred_username || (email ? email.split("@")[0] : "anon");
-        const handle = descriptor.startsWith("@") ? descriptor : "@" + descriptor;
-
-        return {
-            id: user.id,
-            email: email,
-            handle: handle,
-            username: descriptor.replace("@", ""),
-            avatar: user.user_metadata?.avatar_url || null,
-            role: handle === "@hermes" ? 'admin' : 'user'
-        };
-    };
-
-    const initAuthListener = async () => {
-        if (!supabase) {
-            console.warn("Supabase auth disabled: keys missing");
-            return;
-        }
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            setCurrentUser(mapUser(user));
-        } else {
-            setCurrentUser(null);
-        }
-
-        supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-                setCurrentUser(mapUser(session.user));
-            } else {
-                setCurrentUser(null);
-            }
-        });
-    };
-
-    const loginWithGoogle = async () => {
-        if (!supabase) return alert("Auth disabled: Missing environment variables");
-        await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin }
-        });
-    };
-
-    const loginWithX = async () => {
-        if (!supabase) return alert("Auth disabled: Missing environment variables");
-        await supabase.auth.signInWithOAuth({
-            provider: 'x', // Changed from 'twitter' as per user request
-            options: { redirectTo: window.location.origin }
-        });
-    };
-
-
-    const loginWithEmail = async (email) => {
-        if (!supabase) return alert("Auth disabled: Missing environment variables");
-        await supabase.auth.signInWithOtp({
-            email,
-            options: { emailRedirectTo: window.location.origin }
-        });
-    };
-
-    const logout = async () => {
-        if (!supabase) {
-            setCurrentUser(null);
-            return;
-        }
-        await supabase.auth.signOut();
-        setCurrentUser(null);
-    };
+    // Auth logic handled by Privy in App.jsx, store just holds state
+    const logout = () => setCurrentUser(null);
 
     // Shelf logic
     const saveShelf = (shelfData) => {
@@ -164,7 +93,7 @@ export const useStore = () => {
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
     return {
-        currentUser, initAuthListener, loginWithGoogle, loginWithX, loginWithEmail, logout,
+        currentUser, setCurrentUser, loginWithGoogle, loginWithX, loginWithEmail, logout,
         accessories, addAccessory, updateAccessory, deleteAccessory,
         themes, addTheme, updateTheme, deleteTheme,
         shelves, saveShelf, toggleShelfStatus,

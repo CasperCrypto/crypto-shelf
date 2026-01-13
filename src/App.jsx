@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { usePrivy } from '@privy-io/react-auth';
 import Landing from './pages/Landing';
 import Explore from './pages/Explore';
 import ShelfBuilder from './pages/ShelfBuilder';
@@ -15,12 +16,14 @@ import './App.css';
 
 const Nav = () => {
   const { currentUser, logout } = useAppStore();
+  const { logout: privyLogout } = usePrivy();
   const location = useLocation();
   const navigate = useNavigate();
 
   const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await privyLogout();
     logout();
     navigate('/');
   };
@@ -71,12 +74,39 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 };
 
 function App() {
-  const { initAuthListener } = useAppStore();
+  const { user: privyUser, ready, authenticated } = usePrivy();
+  const { currentUser, setCurrentUser } = useAppStore();
 
   useEffect(() => {
-    initAuthListener();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (ready && authenticated && privyUser) {
+      // Map Privy user to App user
+      const wallet = privyUser.wallet?.address;
+      const email = privyUser.email?.address;
+      const twitter = privyUser.twitter?.username;
+
+      let handle = "@anon";
+      if (twitter) handle = "@" + twitter;
+      else if (email) handle = "@" + email.split("@")[0];
+      else if (wallet) handle = wallet.slice(0, 6);
+
+      const mappedUser = {
+        id: privyUser.id,
+        handle: handle,
+        username: twitter || (email ? email.split("@")[0] : "anon"),
+        avatar: null, // Privy doesn't provide avatar by default unless social login
+        address: wallet,
+        email: email,
+        role: handle === "@hermes" ? 'admin' : 'user'
+      };
+
+      // Only update if changed to avoid loops
+      if (!currentUser || currentUser.id !== mappedUser.id) {
+        setCurrentUser(mappedUser);
+      }
+    } else if (ready && !authenticated) {
+      if (currentUser) setCurrentUser(null);
+    }
+  }, [ready, authenticated, privyUser, setCurrentUser, currentUser]);
 
   return (
     <Router>

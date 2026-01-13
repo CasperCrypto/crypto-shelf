@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePrivy } from '@privy-io/react-auth';
 import { useAppStore } from '../main';
 import { INITIAL_ACCESSORIES } from '../store/initialData';
 import './Landing.css';
 
 const Landing = () => {
     const navigate = useNavigate();
-    const { currentUser, loginWithX } = useAppStore();
+    const { currentUser } = useAppStore();
+    const { login } = usePrivy();
 
     useEffect(() => {
         if (currentUser) {
@@ -15,8 +17,7 @@ const Landing = () => {
     }, [currentUser, navigate]);
 
     const handleLogin = () => {
-        loginWithX();
-        navigate('/shelf/me');
+        login();
     };
 
     return (
