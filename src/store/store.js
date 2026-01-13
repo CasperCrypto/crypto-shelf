@@ -44,6 +44,11 @@ export const useStore = () => {
     };
 
     const initAuthListener = async () => {
+        if (!supabase) {
+            console.warn("Supabase auth disabled: keys missing");
+            return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             setCurrentUser(mapUser(user));
@@ -61,6 +66,7 @@ export const useStore = () => {
     };
 
     const loginWithGoogle = async () => {
+        if (!supabase) return alert("Auth disabled: Missing environment variables");
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo: window.location.origin }
@@ -68,6 +74,7 @@ export const useStore = () => {
     };
 
     const loginWithX = async () => {
+        if (!supabase) return alert("Auth disabled: Missing environment variables");
         await supabase.auth.signInWithOAuth({
             provider: 'twitter',
             options: { redirectTo: window.location.origin }
@@ -75,6 +82,7 @@ export const useStore = () => {
     };
 
     const loginWithEmail = async (email) => {
+        if (!supabase) return alert("Auth disabled: Missing environment variables");
         await supabase.auth.signInWithOtp({
             email,
             options: { emailRedirectTo: window.location.origin }
@@ -82,6 +90,10 @@ export const useStore = () => {
     };
 
     const logout = async () => {
+        if (!supabase) {
+            setCurrentUser(null);
+            return;
+        }
         await supabase.auth.signOut();
         setCurrentUser(null);
     };
