@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Explore from './pages/Explore';
@@ -18,7 +19,6 @@ const Nav = () => {
   const navigate = useNavigate();
 
   const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
-  const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
     logout();
@@ -71,6 +71,13 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 };
 
 function App() {
+  const { initAuthListener } = useAppStore();
+
+  useEffect(() => {
+    initAuthListener();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Router>
       <div className="app-container">

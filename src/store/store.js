@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { INITIAL_ACCESSORIES, INITIAL_THEMES, MOCK_SHELVES, MOCK_USERS } from './initialData';
+import { supabase } from '../lib/supabaseClient';
 
 // Helper to load from localStorage
 const load = (key, defaultValue) => {
@@ -13,7 +14,7 @@ const save = (key, value) => {
 };
 
 export const useStore = () => {
-    const [currentUser, setCurrentUser] = useState(load('cryptoShelfUser', null));
+    const [currentUser, setCurrentUser] = useState(null);
     const [accessories, setAccessories] = useState(load('accessories', INITIAL_ACCESSORIES));
     const [themes, setThemes] = useState(load('themes', INITIAL_THEMES));
     const [shelves, setShelves] = useState(load('shelves', MOCK_SHELVES));
@@ -24,23 +25,65 @@ export const useStore = () => {
     useEffect(() => save('themes', themes), [themes]);
     useEffect(() => save('shelves', shelves), [shelves]);
     useEffect(() => save('reactions', reactions), [reactions]);
-    useEffect(() => save('cryptoShelfUser', currentUser), [currentUser]);
+    // Removed manual cryptoShelfUser persistence in favor of Supabase
 
     // Auth logic
-    const loginWithX = () => {
-        const mockUser = {
-            id: 'user_demo_1',
-            username: 'hermes',
-            handle: '@hermes',
-            avatar: 'https://api.dicebear.com/7.x/thumbs/svg?seed=hermes',
-            role: 'admin'
+    const mapUser = (user) => {
+        const email = user.email;
+        const descriptor = user.user_metadata?.preferred_username || (email ? email.split("@")[0] : "anon");
+        const handle = descriptor.startsWith("@") ? descriptor : "@" + descriptor;
+
+        return {
+            id: user.id,
+            email: email,
+            handle: handle,
+            username: descriptor.replace("@", ""),
+            avatar: user.user_metadata?.avatar_url || null,
+            role: handle === "@hermes" ? 'admin' : 'user'
         };
-        setCurrentUser(mockUser);
     };
 
-    const logout = () => {
+    const initAuthListener = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            setCurrentUser(mapUser(user));
+        } else {
+            setCurrentUser(null);
+        }
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setCurrentUser(mapUser(session.user));
+            } else {
+                setCurrentUser(null);
+            }
+        });
+    };
+
+    const loginWithGoogle = async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin }
+        });
+    };
+
+    const loginWithX = async () => {
+        await supabase.auth.signInWithOAuth({
+            provider: 'twitter',
+            options: { redirectTo: window.location.origin }
+        });
+    };
+
+    const loginWithEmail = async (email) => {
+        await supabase.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: window.location.origin }
+        });
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
         setCurrentUser(null);
-        localStorage.removeItem('cryptoShelfUser');
     };
 
     // Shelf logic
@@ -108,7 +151,7 @@ export const useStore = () => {
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
     return {
-        currentUser, loginWithX, logout,
+        currentUser, initAuthListener, loginWithGoogle, loginWithX, loginWithEmail, logout,
         accessories, addAccessory, updateAccessory, deleteAccessory,
         themes, addTheme, updateTheme, deleteTheme,
         shelves, saveShelf, toggleShelfStatus,
