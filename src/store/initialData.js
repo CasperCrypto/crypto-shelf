@@ -19,10 +19,10 @@ export const INITIAL_ACCESSORIES = [
 ];
 
 export const INITIAL_THEMES = [
-  { id: 'dawn', name: 'Early Morning', type: 'GRADIENT', value: 'var(--grad-morning)', frameColor: '#8B5E3C', isActive: true },
-  { id: 'sky', name: 'Blue Sky', type: 'GRADIENT', value: 'var(--grad-sky)', frameColor: '#5D4037', isActive: true },
-  { id: 'mint', name: 'Fresh Mint', type: 'GRADIENT', value: 'var(--grad-mint)', frameColor: '#4E342E', isActive: true },
-  { id: 'sunset', name: 'Sunset Glow', type: 'GRADIENT', value: 'var(--grad-sunset)', frameColor: '#3E2723', isActive: true },
+  { id: 'dawn', name: 'Early Morning', type: 'GRADIENT', value: 'var(--grad-morning)', frameColor: '#8B5E3C', isActive: true, pageBackground: '#FFF5EC' },
+  { id: 'sky', name: 'Blue Sky', type: 'GRADIENT', value: 'var(--grad-sky)', frameColor: '#5D4037', isActive: true, pageBackground: '#E3F2FD' },
+  { id: 'mint', name: 'Fresh Mint', type: 'GRADIENT', value: 'var(--grad-mint)', frameColor: '#4E342E', isActive: true, pageBackground: '#E8F5E9' },
+  { id: 'sunset', name: 'Sunset Glow', type: 'GRADIENT', value: 'var(--grad-sunset)', frameColor: '#3E2723', isActive: true, pageBackground: '#FFF3E0' },
 ];
 
 export const MOCK_USERS = [

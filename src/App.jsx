@@ -81,15 +81,20 @@ function App() {
     if (ready && authenticated && privyUser) {
       // Map Privy user to App user
       const wallet = privyUser.wallet?.address;
-      const email = privyUser.email?.address;
+      // Check both direct email auth and Google auth for email
+      const email = privyUser.email?.address || privyUser.google?.email;
       const twitter = privyUser.twitter?.username;
 
-      let handle = "@anon";
-      if (twitter) handle = "@" + twitter;
-      else if (email) handle = "@" + email.split("@")[0];
-      else if (wallet) handle = wallet.slice(0, 6);
+      console.log("Privy User Debug:", {
+        id: privyUser.id,
+        emailObj: privyUser.email,
+        googleObj: privyUser.google,
+        twitterObj: privyUser.twitter,
+        extractedEmail: email
+      });
 
-      const ADMIN_EMAILS = ['hermescrypto33@gmail.com'];
+      // Include potential typo variant just in case
+      const ADMIN_EMAILS = ['hermescrypto33@gmail.com', 'hermescrytpo33@gmail.com'];
       const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
 
       const mappedUser = {
@@ -101,6 +106,8 @@ function App() {
         email: email,
         role: isAdmin ? 'admin' : 'user'
       };
+
+      console.log("Mapped User Role:", mappedUser.role);
 
       // Only update if changed to avoid loops
       if (!currentUser || currentUser.id !== mappedUser.id) {

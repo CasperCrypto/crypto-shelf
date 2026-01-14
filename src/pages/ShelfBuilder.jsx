@@ -109,6 +109,8 @@ const ShelfBuilder = () => {
 
     // Dynamic background logic
     const pageBg = currentTheme?.pageBackground || '#FFF5EC';
+    console.log("Theme Debug:", { themeId: myShelf.themeId, currentTheme, pageBg });
+
 
     return (
         <div
