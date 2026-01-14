@@ -21,7 +21,7 @@ const Nav = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
+  const isAdmin = currentUser?.role === 'admin';
 
   const handleLogout = async () => {
     await privyLogout();
@@ -61,7 +61,7 @@ const Nav = () => {
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { currentUser } = useAppStore();
-  const isAdmin = currentUser && (currentUser.handle === "@hermes" || currentUser.username === "@hermes");
+  const isAdmin = currentUser?.role === 'admin';
 
   if (!currentUser) {
     return <Navigate to="/" replace />;
@@ -99,9 +99,13 @@ function App() {
       const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
 
       let handle = "@anon";
-      if (twitter) handle = "@" + twitter;
-      else if (email) handle = "@" + email.split("@")[0];
-      else if (wallet) handle = wallet.slice(0, 6);
+      if (twitter) {
+        handle = "@" + twitter.replace(/^@/, '');
+      } else if (email) {
+        handle = "@" + email.split("@")[0].replace(/^@/, '');
+      } else if (wallet) {
+        handle = wallet.slice(0, 6);
+      }
 
       const mappedUser = {
         id: privyUser.id,
@@ -113,18 +117,14 @@ function App() {
         role: isAdmin ? 'admin' : 'user'
       };
 
-      // This change moves the import to the top and removes the misplaced import line
-      // Intentionally targeting lines 115-115 to REMOVE the invalid import line
-      // And adding the import at the top of the file in a separate chunk (if multi-chunk supported, but here separate tool call needed? No, replace_file_content handles single block. I need multi_edit or be clever).
-      // Actually, I can't use replace_file_content to edit two disjoint places (top and line 115) in one go if they are far apart.
-      // I will use multi_replace_file_content.
+
 
 
       // ... inside useEffect ...
       console.log("Mapped User Role:", mappedUser.role);
 
-      // Only update if changed to avoid loops
-      if (!currentUser || currentUser.id !== mappedUser.id) {
+      // Only update if changed or if role needs updating (fix for existing sessions)
+      if (!currentUser || currentUser.id !== mappedUser.id || currentUser.role !== mappedUser.role) {
         setCurrentUser(mappedUser);
         // Sync to Supabase
         upsertProfileFromCurrentUser(mappedUser);
