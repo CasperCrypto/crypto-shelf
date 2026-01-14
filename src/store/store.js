@@ -93,7 +93,7 @@ export const useStore = () => {
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
     return {
-        currentUser, setCurrentUser, loginWithGoogle, loginWithX, loginWithEmail, logout,
+        currentUser, setCurrentUser, logout,
         accessories, addAccessory, updateAccessory, deleteAccessory,
         themes, addTheme, updateTheme, deleteTheme,
         shelves, saveShelf, toggleShelfStatus,
