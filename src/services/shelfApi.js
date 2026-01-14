@@ -78,3 +78,39 @@ export async function saveShelfForUser(userId, { themeId, slots }) {
         console.error("Error saving shelf items:", itemsError);
     }
 }
+
+export async function getAllShelves() {
+    if (!supabase) return [];
+
+    // Fetch shelves with user profile and items
+    // precise join syntax depends on foreign key names, assuming implied relation
+    const { data, error } = await supabase
+        .from('shelves')
+        .select(`
+            *,
+            profiles:user_id ( handle, avatar_url ),
+            items:shelf_items ( * )
+        `)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching all shelves:", error);
+        return [];
+    }
+
+    // Map to App format
+    return data.map(shelf => ({
+        id: shelf.id,
+        userId: shelf.user_id,
+        themeId: shelf.theme_id || 'dawn',
+        slots: Array.from({ length: 8 }).map((_, i) => {
+            const item = shelf.items.find(item => item.slot_index === i);
+            return { index: i, itemId: item ? item.item_key : null };
+        }),
+        user: {
+            handle: shelf.profiles?.handle || 'Unknown',
+            avatar: shelf.profiles?.avatar_url || null
+        },
+        reactions: {} // TODO: implement DB reactions later
+    }));
+}
