@@ -3,6 +3,7 @@ import { useAppStore } from '../main';
 import ShelfCabinet from '../components/ShelfCabinet';
 import AccessoryPicker from '../components/AccessoryPicker';
 import { Save, Palette, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { getShelfForUser, saveShelfForUser } from '../services/shelfApi';
 import './ShelfBuilder.css';
 
 const ShelfBuilder = () => {
@@ -10,27 +11,55 @@ const ShelfBuilder = () => {
     const [myShelf, setMyShelf] = useState(null);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (currentUser) {
-            const existing = shelves.find(s => s.userId === currentUser.id);
-            if (existing) {
-                setMyShelf(existing);
-            } else {
-                const newShelf = {
-                    id: `s-${currentUser.id}`,
-                    userId: currentUser.id,
-                    themeId: 'dawn',
-                    slots: Array.from({ length: 8 }).map((_, i) => ({ index: i, itemId: null })),
-                    reactions: {},
-                    user: currentUser
-                };
-                setMyShelf(newShelf);
+        const loadShelf = async () => {
+            if (currentUser) {
+                setLoading(true);
+                // Try fetching from Supabase first
+                const { shelf: dbShelf, items: dbItems } = await getShelfForUser(currentUser.id);
+
+                if (dbShelf) {
+                    // Reconstruct shelf from DB data
+                    const slots = Array.from({ length: 8 }).map((_, i) => {
+                        const item = dbItems.find(item => item.slot_index === i);
+                        return { index: i, itemId: item ? item.item_key : null };
+                    });
+
+                    setMyShelf({
+                        id: dbShelf.id,
+                        userId: currentUser.id,
+                        themeId: dbShelf.theme_id || 'dawn',
+                        slots,
+                        reactions: {},
+                        user: currentUser
+                    });
+                } else {
+                    // Fallback to local or default if no DB shelf yet
+                    const existing = shelves.find(s => s.userId === currentUser.id);
+                    if (existing) {
+                        setMyShelf(existing);
+                    } else {
+                        const newShelf = {
+                            id: `s-${currentUser.id}`,
+                            userId: currentUser.id,
+                            themeId: 'dawn',
+                            slots: Array.from({ length: 8 }).map((_, i) => ({ index: i, itemId: null })),
+                            reactions: {},
+                            user: currentUser
+                        };
+                        setMyShelf(newShelf);
+                    }
+                }
+                setLoading(false);
             }
-        }
+        };
+
+        loadShelf();
     }, [currentUser, shelves]);
 
-    if (!myShelf) return <div className="loading">Loading your shelf...</div>;
+    if (!myShelf || loading) return <div className="loading">Loading your shelf...</div>;
 
     const handleSlotClick = (index) => {
         setSelectedSlot(index);
@@ -67,6 +96,14 @@ const ShelfBuilder = () => {
         setMyShelf({ ...myShelf, slots: randomSlots });
     };
 
+    const handleSave = async () => {
+        // Save locally to update UI immediately
+        saveShelf(myShelf);
+        // Persist to Supabase
+        await saveShelfForUser(currentUser.id, { themeId: myShelf.themeId, slots: myShelf.slots });
+        alert("Shelf saved!");
+    };
+
     const currentTheme = themes.find(t => t.id === myShelf.themeId);
 
     return (
@@ -79,7 +116,7 @@ const ShelfBuilder = () => {
                         <p>Customize your 2x4 identity grid</p>
                     </div>
                 </div>
-                <button className="btn-save" onClick={() => saveShelf(myShelf)}>
+                <button className="btn-save" onClick={handleSave}>
                     <Save size={20} /> Save Changes
                 </button>
             </header>

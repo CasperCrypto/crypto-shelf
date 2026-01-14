@@ -11,10 +11,21 @@ export const useAppStore = () => useContext(StoreContext);
 
 const Root = () => {
   const store = useStore();
+  const appId = import.meta.env.VITE_PRIVY_APP_ID;
+
+  if (!appId) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', color: '#fff' }}>
+        <h1>Configuration Required</h1>
+        <p>Please add <code>VITE_PRIVY_APP_ID</code> to your environment variables.</p>
+      </div>
+    );
+  }
+
   return (
     <StoreContext.Provider value={store}>
       <PrivyProvider
-        appId={import.meta.env.VITE_PRIVY_APP_ID || ""}
+        appId={appId}
         config={{
           loginMethods: ['email', 'wallet', 'google', 'twitter'],
           appearance: {
