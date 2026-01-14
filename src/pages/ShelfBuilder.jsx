@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../main';
 import ShelfCabinet from '../components/ShelfCabinet';
 import AccessoryPicker from '../components/AccessoryPicker';
-import { Save, Palette, Image as ImageIcon, Sparkles } from 'lucide-react';
+import DiscoverLibrary from '../components/DiscoverLibrary'; // NEW IMPORT
+import { Save, Palette, Sparkles } from 'lucide-react';
 import { getShelfForUser, saveShelfForUser } from '../services/shelfApi';
 import './ShelfBuilder.css';
 
@@ -106,8 +107,19 @@ const ShelfBuilder = () => {
 
     const currentTheme = themes.find(t => t.id === myShelf.themeId);
 
+    // Dynamic background logic
+    const pageBg = currentTheme?.pageBackground || '#FFF5EC';
+
     return (
-        <div className="builder-page container">
+        <div
+            className="builder-page container"
+            style={{
+                background: pageBg,
+                transition: 'background 220ms ease-out',
+                minHeight: 'calc(100vh - 80px)', // ensure full height coverage
+                borderRadius: '16px' // Optional polish so it looks like a contained app
+            }}
+        >
             <header className="builder-header">
                 <div className="user-info">
                     <img src={currentUser.avatar} alt={currentUser.handle} className="avatar" />
@@ -147,15 +159,8 @@ const ShelfBuilder = () => {
                         </div>
                     </section>
 
-                    <section className="control-section">
-                        <h3><ImageIcon size={20} /> Slot Management</h3>
-                        <p>Click any slot in the cabinet to swap accessories.</p>
-                        <div className="slot-indicators">
-                            {myShelf.slots.map((s, i) => (
-                                <div key={i} className={`slot-dot ${s.itemId ? 'filled' : ''}`} />
-                            ))}
-                        </div>
-                    </section>
+                    {/* REPLACED Slot Management with DiscoverLibrary */}
+                    <DiscoverLibrary accessories={accessories} />
 
                     <button className="btn-randomize" onClick={randomizeShelf}>
                         <Sparkles size={20} /> Randomize Items

@@ -89,6 +89,9 @@ function App() {
       else if (email) handle = "@" + email.split("@")[0];
       else if (wallet) handle = wallet.slice(0, 6);
 
+      const ADMIN_EMAILS = ['hermescrypto33@gmail.com'];
+      const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
+
       const mappedUser = {
         id: privyUser.id,
         handle: handle,
@@ -96,7 +99,7 @@ function App() {
         avatar: null, // Privy doesn't provide avatar by default unless social login
         address: wallet,
         email: email,
-        role: handle === "@hermes" ? 'admin' : 'user'
+        role: isAdmin ? 'admin' : 'user'
       };
 
       // Only update if changed to avoid loops

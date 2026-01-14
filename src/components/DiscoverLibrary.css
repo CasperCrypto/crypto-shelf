@@ -1,0 +1,99 @@
+.discover-library {
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.discover-library h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.library-scroll-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-behavior: smooth;
+    /* Hide scrollbar for cleaner look but allow scroll */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+.library-scroll-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.library-scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.library-item-card {
+    flex: 0 0 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+.library-item-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.library-item-image {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.library-item-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.library-item-rarity-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Rarity Colors */
+.library-item-card[data-rarity="Legendary"] .library-item-rarity-badge {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.library-item-card[data-rarity="Rare"] .library-item-rarity-badge {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.library-item-card[data-rarity="Common"] .library-item-rarity-badge {
+    background: #F5F5F5;
+    color: #757575;
+}
