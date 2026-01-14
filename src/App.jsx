@@ -97,6 +97,11 @@ function App() {
       const ADMIN_EMAILS = ['hermescrypto33@gmail.com', 'hermescrytpo33@gmail.com'];
       const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
 
+      let handle = "@anon";
+      if (twitter) handle = "@" + twitter;
+      else if (email) handle = "@" + email.split("@")[0];
+      else if (wallet) handle = wallet.slice(0, 6);
+
       const mappedUser = {
         id: privyUser.id,
         handle: handle,
