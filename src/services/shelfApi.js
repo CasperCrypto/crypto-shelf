@@ -9,7 +9,7 @@ export async function getShelfForUser(userId) {
         .select('*')
         .eq('user_id', userId)
         .limit(1)
-        .single();
+        .maybeSingle();
 
     if (shelfError || !shelfData) {
         // Not found or error
@@ -43,7 +43,7 @@ export async function saveShelfForUser(userId, { themeId, slots }) {
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' }) // Assuming one shelf per user, strictly enforcing uniqueness on user_id might vary by schema but typical for "My Shelf"
         .select()
-        .single();
+        .maybeSingle();
 
     if (shelfError || !shelfData) {
         console.error("Error saving shelf:", shelfError);

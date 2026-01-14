@@ -12,6 +12,7 @@ import AdminThemes from './pages/admin/AdminThemes';
 import AdminModeration from './pages/admin/AdminModeration';
 import { useAppStore } from './main';
 import { LayoutGrid, Compass, Trophy, User, ShieldCheck, LogOut } from 'lucide-react';
+import { upsertProfileFromCurrentUser } from './services/profileApi';
 import './App.css';
 
 const Nav = () => {
@@ -112,11 +113,21 @@ function App() {
         role: isAdmin ? 'admin' : 'user'
       };
 
+      // This change moves the import to the top and removes the misplaced import line
+      // Intentionally targeting lines 115-115 to REMOVE the invalid import line
+      // And adding the import at the top of the file in a separate chunk (if multi-chunk supported, but here separate tool call needed? No, replace_file_content handles single block. I need multi_edit or be clever).
+      // Actually, I can't use replace_file_content to edit two disjoint places (top and line 115) in one go if they are far apart.
+      // I will use multi_replace_file_content.
+
+
+      // ... inside useEffect ...
       console.log("Mapped User Role:", mappedUser.role);
 
       // Only update if changed to avoid loops
       if (!currentUser || currentUser.id !== mappedUser.id) {
         setCurrentUser(mappedUser);
+        // Sync to Supabase
+        upsertProfileFromCurrentUser(mappedUser);
       }
     } else if (ready && !authenticated) {
       if (currentUser) setCurrentUser(null);
