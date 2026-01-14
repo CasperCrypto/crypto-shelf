@@ -1,5 +1,10 @@
+/* 1. Main Page Container */
 .builder-page {
     padding-top: 40px;
+    /* Desktop Padding */
+    padding: 32px 24px 96px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .builder-header {
@@ -43,11 +48,25 @@
     gap: 10px;
 }
 
+/* 2. Layout */
 .builder-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: start;
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+}
+
+.shelf-column {
+    flex: 0 0 auto;
+    /* Prevent shrinking */
+}
+
+/* 4. Controls Column */
+.controls-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* Updated gap */
 }
 
 .control-section {
@@ -55,7 +74,8 @@
     padding: 24px;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-soft);
-    margin-bottom: 24px;
+    margin-bottom: 0;
+    /* Remove explicit margin, handle via gap */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -128,10 +148,56 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    cursor: pointer;
 }
 
-@media (max-width: 800px) {
+/* MOBILE STYLES */
+@media (max-width: 768px) {
+
+    /* 1. Main Page Container */
+    .builder-page {
+        padding: 16px 12px 96px;
+    }
+
+    .builder-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 2. Layout: Column on Mobile */
     .builder-layout {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    /* 3. Cabinet Centering */
+    .shelf-column {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .shelf-column .shelf-cabinet {
+        max-width: 360px;
+        /* Constrain width on mobile */
+        width: 100%;
+    }
+
+    /* 4. Full Width Controls */
+    .controls-column {
+        width: 100%;
+    }
+
+    .control-section,
+    .discover-library {
+        width: 100%;
     }
 }
