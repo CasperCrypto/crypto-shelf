@@ -3,6 +3,7 @@ import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import AccessoryPicker from '../components/AccessoryPicker';
 import EditProfileModal from '../components/EditProfileModal'; // NEW IMPORT
+import DiscoverLibrary from '../components/DiscoverLibrary';
 
 import { Save, Palette, Sparkles, Edit2 } from 'lucide-react'; // Added Edit2 icon
 import { getShelfForUser, saveShelfForUser } from '../services/shelfApi';
