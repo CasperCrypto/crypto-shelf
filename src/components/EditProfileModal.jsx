@@ -132,7 +132,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     <div className="avatar-upload-section">
                         <div className="avatar-wrapper" onClick={() => fileInputRef.current.click()}>
                             <img
-                                src={avatarPreview || 'https://via.placeholder.com/150'}
+                                src={avatarPreview || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
                                 alt="Profile"
                                 className="avatar-preview-large"
                             />
