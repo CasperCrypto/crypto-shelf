@@ -109,7 +109,7 @@ function App() {
           username: twitter || (email ? email.split("@")[0] : "anon"),
           avatar: dbProfile?.avatar_url || null,
           twitterHandle: twitter || dbProfile?.twitter_handle || null,
-          isVerified: dbProfile?.is_verified || false,
+          isVerified: dbProfile?.is_verified || !!(twitter || dbProfile?.twitter_handle),
           address: wallet,
           email: email,
           role: isAdmin ? 'admin' : 'user'

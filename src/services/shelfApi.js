@@ -111,7 +111,7 @@ export async function getAllShelves() {
             handle: shelf.profiles?.handle || 'Unknown',
             avatar: shelf.profiles?.avatar_url || null,
             twitterHandle: shelf.profiles?.twitter_handle || null,
-            isVerified: shelf.profiles?.is_verified || false
+            isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle)
         },
         reactions: {} // TODO: implement DB reactions later
     }));
