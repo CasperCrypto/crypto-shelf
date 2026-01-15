@@ -1,0 +1,112 @@
+/* UserIdentity.css */
+
+.user-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.identity-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.verified-badge-mini {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.identity-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.handle-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.handle-row:hover .identity-handle {
+    color: var(--color-primary);
+}
+
+.identity-handle {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    transition: color 0.15s;
+}
+
+.verified-icon {
+    flex-shrink: 0;
+}
+
+.twitter-link-small {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    margin-top: -2px;
+    margin-left: -4px;
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.twitter-link-small:hover {
+    background: #f0f2f5;
+    color: #000;
+}
+
+.twitter-link-small span {
+    text-transform: lowercase;
+}
+
+/* Sizes */
+.user-identity.size-sm .identity-avatar {
+    width: 32px;
+    height: 32px;
+}
+
+.user-identity.size-sm .identity-handle {
+    font-size: 0.85rem;
+}
+
+.user-identity.size-lg .identity-avatar {
+    width: 56px;
+    height: 56px;
+    border-width: 3px;
+}
+
+.user-identity.size-lg .identity-handle {
+    font-size: 1.1rem;
+}
+
+.user-identity.size-lg .twitter-link-small {
+    font-size: 0.85rem;
+}

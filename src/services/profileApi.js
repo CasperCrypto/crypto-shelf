@@ -9,6 +9,7 @@ export async function upsertProfileFromCurrentUser(currentUser) {
             id: currentUser.id,
             handle: currentUser.handle,
             avatar_url: currentUser.avatar,
+            twitter_handle: currentUser.twitterHandle || null,
             updated_at: new Date().toISOString(),
         }, { onConflict: 'id' });
 

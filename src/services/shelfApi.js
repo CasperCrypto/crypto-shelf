@@ -88,7 +88,7 @@ export async function getAllShelves() {
         .from('shelves')
         .select(`
             *,
-            profiles:user_id ( handle, avatar_url ),
+            profiles:user_id ( handle, avatar_url, twitter_handle, is_verified ),
             items:shelf_items ( * )
         `)
         .order('created_at', { ascending: false });
@@ -109,7 +109,9 @@ export async function getAllShelves() {
         }),
         user: {
             handle: shelf.profiles?.handle || 'Unknown',
-            avatar: shelf.profiles?.avatar_url || null
+            avatar: shelf.profiles?.avatar_url || null,
+            twitterHandle: shelf.profiles?.twitter_handle || null,
+            isVerified: shelf.profiles?.is_verified || false
         },
         reactions: {} // TODO: implement DB reactions later
     }));

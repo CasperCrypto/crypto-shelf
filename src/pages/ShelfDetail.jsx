@@ -23,8 +23,14 @@ const ShelfDetail = () => {
                     <ArrowLeft size={24} />
                 </button>
                 <div className="owner-meta">
-                    <h1>{shelf.user?.displayName || 'Unknown User'}'s Shelf</h1>
-                    <p>@{shelf.user?.handle}</p>
+                    <UserIdentity
+                        handle={shelf.user?.handle}
+                        avatar={shelf.user?.avatar}
+                        twitterHandle={shelf.user?.twitterHandle}
+                        isVerified={shelf.user?.isVerified}
+                        size="lg"
+                        showTwitter={true}
+                    />
                 </div>
                 <button className="share-btn">
                     <Share2 size={24} />

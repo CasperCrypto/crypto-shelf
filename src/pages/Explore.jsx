@@ -64,8 +64,13 @@ const Explore = () => {
                     dbShelves.map(shelf => (
                         <div key={shelf.id} className="shelf-card" onClick={() => navigate(`/shelf/${shelf.id}`)}>
                             <div className="shelf-user-header">
-                                <img src={shelf.user?.avatar || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} alt="Avatar" className="user-avatar-mini" />
-                                <span className="username">{shelf.user?.handle || 'Anon'}</span>
+                                <UserIdentity
+                                    handle={shelf.user?.handle}
+                                    avatar={shelf.user?.avatar}
+                                    twitterHandle={shelf.user?.twitterHandle}
+                                    isVerified={shelf.user?.isVerified}
+                                    size="sm"
+                                />
                             </div>
                             <div className="shelf-preview-mini">
                                 <ShelfCabinet

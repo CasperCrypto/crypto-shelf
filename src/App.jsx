@@ -108,6 +108,8 @@ function App() {
           handle: dbProfile?.handle || handle,
           username: twitter || (email ? email.split("@")[0] : "anon"),
           avatar: dbProfile?.avatar_url || null,
+          twitterHandle: twitter || dbProfile?.twitter_handle || null,
+          isVerified: dbProfile?.is_verified || false,
           address: wallet,
           email: email,
           role: isAdmin ? 'admin' : 'user'
@@ -117,11 +119,13 @@ function App() {
           currentUser.id !== mappedUser.id ||
           currentUser.role !== mappedUser.role ||
           currentUser.handle !== mappedUser.handle ||
-          currentUser.avatar !== mappedUser.avatar;
+          currentUser.avatar !== mappedUser.avatar ||
+          currentUser.twitterHandle !== mappedUser.twitterHandle;
 
         if (hasChanged) {
           setCurrentUser(mappedUser);
-          if (!dbProfile) {
+          // If no profile exists OR if we just linked twitter and DB doesn't have it, upsert
+          if (!dbProfile || (mappedUser.twitterHandle && !dbProfile.twitter_handle)) {
             upsertProfileFromCurrentUser(mappedUser);
           }
         }

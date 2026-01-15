@@ -151,6 +151,29 @@
     cursor: pointer;
 }
 
+@media (min-width: 1024px) {
+    .builder-layout {
+        gap: 60px;
+    }
+
+    .shelf-column {
+        flex: 1.5;
+        transform: scale(1.15);
+        transform-origin: center top;
+        padding-top: 20px;
+    }
+
+    .controls-column {
+        flex: 1;
+    }
+}
+
+@media (min-width: 1440px) {
+    .shelf-column {
+        transform: scale(1.3);
+    }
+}
+
 /* MOBILE STYLES */
 @media (max-width: 768px) {
 
