@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import ReactionBar from '../components/ReactionBar';
-import { ArrowLeft, Share2 } from 'lucide-react';
 import UserIdentity from '../components/UserIdentity';
+import { ArrowLeft, Share2 } from 'lucide-react';
+import { getShelfById } from '../services/shelfApi';
 import './ShelfDetail.css';
 
 const ShelfDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { shelves, accessories, themes, addReaction } = useAppStore();
+    const { accessories, themes } = useAppStore();
+    const [shelf, setShelf] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const shelf = shelves.find(s => s.id === id);
-    const theme = shelf ? themes.find(t => t.id === shelf.themeId) : null;
+    useEffect(() => {
+        const fetchShelf = async () => {
+            setLoading(true);
+            try {
+                const data = await getShelfById(id);
+                setShelf(data);
+            } catch (error) {
+                console.error("Failed to fetch shelf:", error);
+                setShelf(null); // Ensure shelf is null if fetch fails
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchShelf();
+    }, [id]);
 
+    if (loading) return <div className="loading">Loading shelf...</div>;
     if (!shelf) return <div className="loading">Shelf not found</div>;
+
+    const theme = themes.find(t => t.id === shelf.themeId);
 
     return (
         <div className="detail-page container">

@@ -59,3 +59,16 @@ create policy "Enable update for shelves" on public.shelves for update using (tr
 create policy "Enable insert for items" on public.shelf_items for insert with check (true);
 create policy "Enable update for items" on public.shelf_items for update using (true);
 create policy "Enable delete for items" on public.shelf_items for delete using (true);
+-- 4. REACTIONS (Interactions like 🔥💎)
+create table public.reactions (
+  id uuid primary key default uuid_generate_v4(),
+  shelf_id uuid references public.shelves(id) on delete cascade not null,
+  user_id text references public.profiles(id) on delete cascade,
+  type text not null, 
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Allow everyone to see and add reactions
+alter table public.reactions enable row level security;
+create policy "Reactions are viewable by everyone" on public.reactions for select using (true);
+create policy "Anyone can react" on public.reactions for insert with check (true);

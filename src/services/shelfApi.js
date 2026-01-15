@@ -79,17 +79,48 @@ export async function saveShelfForUser(userId, { themeId, slots }) {
     }
 }
 
+export async function getReactionsForShelf(shelfId) {
+    if (!shelfId || !supabase) return [];
+
+    const { data, error } = await supabase
+        .from('reactions')
+        .select('*')
+        .eq('shelf_id', shelfId);
+
+    if (error) {
+        console.error("Error fetching reactions:", error);
+        return [];
+    }
+    return data;
+}
+
+export async function saveReaction(shelfId, userId, type) {
+    if (!shelfId || !supabase) return;
+
+    const { error } = await supabase
+        .from('reactions')
+        .insert({
+            shelf_id: shelfId,
+            user_id: userId || null,
+            type: type
+        });
+
+    if (error) {
+        console.error("Error saving reaction:", error);
+    }
+}
+
 export async function getAllShelves() {
     if (!supabase) return [];
 
-    // Fetch shelves with user profile and items
-    // precise join syntax depends on foreign key names, assuming implied relation
+    // Fetch shelves with user profile, items and reactions
     const { data, error } = await supabase
         .from('shelves')
         .select(`
             *,
             profiles:user_id ( handle, avatar_url, twitter_handle, is_verified ),
-            items:shelf_items ( * )
+            items:shelf_items ( * ),
+            reactions ( type )
         `)
         .order('created_at', { ascending: false });
 
@@ -99,20 +130,66 @@ export async function getAllShelves() {
     }
 
     // Map to App format
-    return data.map(shelf => ({
-        id: shelf.id,
-        userId: shelf.user_id,
-        themeId: shelf.theme_id || 'dawn',
+    return data.map(shelf => {
+        // Count reactions by type
+        const reactionCounts = {};
+        shelf.reactions?.forEach(r => {
+            reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1;
+        });
+
+        return {
+            id: shelf.id,
+            userId: shelf.user_id,
+            themeId: shelf.theme_id || 'dawn',
+            slots: Array.from({ length: 8 }).map((_, i) => {
+                const item = shelf.items.find(item => item.slot_index === i);
+                return { index: i, itemId: item ? item.item_key : null };
+            }),
+            user: {
+                handle: shelf.profiles?.handle || 'Unknown',
+                avatar: shelf.profiles?.avatar_url || null,
+                twitterHandle: shelf.profiles?.twitter_handle || null,
+                isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle)
+            },
+            reactions: reactionCounts,
+            totalReactions: shelf.reactions?.length || 0
+        };
+    });
+}
+
+export async function getShelfById(shelfId) {
+    if (!shelfId || !supabase) return null;
+
+    const { data, error } = await supabase
+        .from('shelves')
+        .select(`
+            *,
+            profiles:user_id ( handle, avatar_url, twitter_handle, is_verified ),
+            items:shelf_items ( * )
+        `)
+        .eq('id', shelfId)
+        .maybeSingle();
+
+    if (error || !data) {
+        console.error("Error fetching shelf by id:", error);
+        return null;
+    }
+
+    return {
+        id: data.id,
+        userId: data.user_id,
+        themeId: data.theme_id || 'dawn',
         slots: Array.from({ length: 8 }).map((_, i) => {
-            const item = shelf.items.find(item => item.slot_index === i);
+            const item = data.items.find(item => item.slot_index === i);
             return { index: i, itemId: item ? item.item_key : null };
         }),
         user: {
-            handle: shelf.profiles?.handle || 'Unknown',
-            avatar: shelf.profiles?.avatar_url || null,
-            twitterHandle: shelf.profiles?.twitter_handle || null,
-            isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle)
-        },
-        reactions: {} // TODO: implement DB reactions later
-    }));
+            handle: data.profiles?.handle || 'Unknown',
+            avatar: data.profiles?.avatar_url || null,
+            twitterHandle: data.profiles?.twitter_handle || null,
+            isVerified: (data.profiles?.is_verified || !!data.profiles?.twitter_handle)
+        }
+    };
 }
+
+

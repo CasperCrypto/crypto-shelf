@@ -1,16 +1,29 @@
-import React, { useState } from 'react';
-import { useAppStore } from '../AppContext';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy, Medal, Star } from 'lucide-react';
 import UserIdentity from '../components/UserIdentity';
+import { getAllShelves } from '../services/shelfApi';
 import './Rankings.css';
 
 const Rankings = () => {
-    const { shelves, reactions } = useAppStore();
+    const [communityShelves, setCommunityShelves] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('WEEKLY');
+    const navigate = useNavigate();
 
-    const getScore = (shelfId) => reactions.filter(r => r.shelfId === shelfId).length;
+    useEffect(() => {
+        const fetchRankings = async () => {
+            setLoading(true);
+            const shelves = await getAllShelves();
+            // Sort by total reactions
+            const sorted = shelves.sort((a, b) => b.totalReactions - a.totalReactions);
+            setCommunityShelves(sorted);
+            setLoading(false);
+        };
+        fetchRankings();
+    }, []);
 
-    const sortedShelves = [...shelves].sort((a, b) => getScore(b.id) - getScore(a.id));
+    if (loading) return <div className="loading-container">Loading leaderboard...</div>;
 
     return (
         <div className="rankings-page container">
@@ -20,20 +33,23 @@ const Rankings = () => {
             </header>
 
             <div className="rankings-tabs">
-                <button className={tab === 'WEEKLY' ? 'active' : ''} onClick={() => setTab('WEEKLY')}>This Week</button>
-                <button className={tab === 'ALL_TIME' ? 'active' : ''} onClick={() => setTab('ALL_TIME')}>All Time</button>
+                <button className={tab === 'WEEKLY' ? 'active' : ''} onClick={() => setTab('WEEKLY')}>Active Creators</button>
             </div>
 
             <div className="rankings-list">
-                {sortedShelves.map((shelf, idx) => {
-                    const shelfReactions = reactions.filter(r => r.shelfId === shelf.id);
-                    const counts = { FIRE: 0, DIAMOND: 0, FUNNY: 0, EYES: 0, BRAIN: 0 };
-                    shelfReactions.forEach(r => counts[r.type]++);
-
+                {communityShelves.map((shelf, idx) => {
                     return (
-                        <div key={shelf.id} className={`ranking-item rank-${idx + 1}`}>
+                        <div
+                            key={shelf.id}
+                            className={`ranking-item rank-${idx + 1}`}
+                            onClick={() => navigate(`/shelf/${shelf.id}`)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="rank-number">
-                                {idx === 0 ? <Trophy color="#FFC947" size={32} /> : idx === 1 ? <Medal color="#C0C0C0" size={28} /> : idx === 2 ? <Medal color="#CD7F32" size={24} /> : idx + 1}
+                                {idx === 0 ? <Trophy color="#FFC947" size={32} /> :
+                                    idx === 1 ? <Medal color="#C0C0C0" size={28} /> :
+                                        idx === 2 ? <Medal color="#CD7F32" size={24} /> :
+                                            idx + 1}
                             </div>
                             <UserIdentity
                                 handle={shelf.user?.handle}
@@ -45,7 +61,7 @@ const Rankings = () => {
                             <div className="rank-stats">
                                 <div className="stat">
                                     <Star size={16} fill="var(--color-accent)" stroke="var(--color-accent)" />
-                                    <span>{shelfReactions.length}</span>
+                                    <span>{shelf.totalReactions || 0}</span>
                                 </div>
                             </div>
                         </div>
