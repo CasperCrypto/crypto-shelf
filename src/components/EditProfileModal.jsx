@@ -1,21 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAppStore } from '../AppContext';
 import { usePrivy } from '@privy-io/react-auth';
-import { X, Save, Link as LinkIcon, Twitter } from 'lucide-react';
+import { X, Save, Link as LinkIcon, Twitter, Upload, Camera, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import './EditProfileModal.css';
 
 const EditProfileModal = ({ isOpen, onClose }) => {
     const { currentUser, setCurrentUser } = useAppStore();
     const { linkTwitter, user: privyUser } = usePrivy();
+
+    // State
     const [handle, setHandle] = useState(currentUser?.handle?.replace(/^@/, '') || '');
-    const [avatar, setAvatar] = useState(currentUser?.avatar || '');
-    const [loading, setLoading] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState(currentUser?.avatar || '');
+    const [isUploading, setIsUploading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const fileInputRef = useRef(null);
 
     if (!isOpen || !currentUser) return null;
 
+    // Helper: Compress Image via Canvas
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 300; // Small, optimized size for avatars
+                    const scaleSize = MAX_WIDTH / img.width;
+                    const width = MAX_WIDTH;
+                    const height = img.height * scaleSize;
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', 0.7); // 70% quality JPEG
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            setIsUploading(true);
+
+            // 1. Compress
+            const compressedBlob = await compressImage(file);
+            const fileName = `${currentUser.id}-${Date.now()}.jpg`;
+
+            // 2. Upload to Supabase 'avatars' bucket
+            const { data, error } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, compressedBlob, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) throw error;
+
+            // 3. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+
+            setAvatarPreview(publicUrl);
+        } catch (error) {
+            console.error("Upload failed:", error);
+            alert("Upload failed. Make sure your 'avatars' storage bucket is public!");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleSave = async () => {
-        setLoading(true);
+        setIsSaving(true);
         const newHandle = handle.startsWith('@') ? handle : `@${handle}`;
 
         // 1. Update Supabase
@@ -23,7 +92,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
             .from('profiles')
             .update({
                 handle: newHandle,
-                avatar_url: avatar,
+                avatar_url: avatarPreview, // Use the uploaded/preview URL
                 updated_at: new Date().toISOString()
             })
             .eq('id', currentUser.id);
@@ -31,7 +100,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         if (error) {
             console.error("Error updating profile:", error);
             alert("Failed to update profile. Please try again.");
-            setLoading(false);
+            setIsSaving(false);
             return;
         }
 
@@ -39,10 +108,10 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         setCurrentUser({
             ...currentUser,
             handle: newHandle,
-            avatar: avatar
+            avatar: avatarPreview
         });
 
-        setLoading(false);
+        setIsSaving(false);
         onClose();
     };
 
@@ -50,56 +119,74 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content profile-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-content profile-modal glass-panel" onClick={e => e.stopPropagation()}>
                 <button className="close-btn" onClick={onClose}><X size={24} /></button>
 
-                <h2>Edit Profile</h2>
+                <div className="modal-header">
+                    <h2>Edit Profile</h2>
+                    <p>Customize your identity on the shelf.</p>
+                </div>
 
-                <div className="form-group">
-                    <label>Display Handle</label>
-                    <div className="input-with-prefix">
-                        <span className="prefix">@</span>
+                <div className="modal-body">
+                    {/* Avatar Upload Section */}
+                    <div className="avatar-upload-section">
+                        <div className="avatar-wrapper" onClick={() => fileInputRef.current.click()}>
+                            <img
+                                src={avatarPreview || 'https://via.placeholder.com/150'}
+                                alt="Profile"
+                                className="avatar-preview-large"
+                            />
+                            <div className="avatar-overlay">
+                                {isUploading ? <Loader2 className="spin" /> : <Camera size={24} />}
+                            </div>
+                        </div>
                         <input
-                            type="text"
-                            value={handle}
-                            onChange={(e) => setHandle(e.target.value.replace(/^@/, ''))} // Prevent user typing @
-                            placeholder="username"
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            hidden
                         />
+                        <button className="btn-text" onClick={() => fileInputRef.current.click()}>
+                            Change Profile Photo
+                        </button>
+                    </div>
+
+                    {/* Handle Input */}
+                    <div className="form-group">
+                        <label>Display Handle</label>
+                        <div className="input-with-prefix">
+                            <span className="prefix">@</span>
+                            <input
+                                type="text"
+                                value={handle}
+                                onChange={(e) => setHandle(e.target.value.replace(/^@/, ''))}
+                                placeholder="username"
+                                maxLength={20}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Social Linking */}
+                    <div className="form-group">
+                        <label>Linked Accounts</label>
+                        {isTwitterLinked ? (
+                            <div className="linked-badge success">
+                                <Twitter size={16} />
+                                <span>Twitter Connected</span>
+                            </div>
+                        ) : (
+                            <button className="btn-social-link twitter" onClick={linkTwitter}>
+                                <Twitter size={18} /> Connect Twitter / X
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label>Avatar URL</label>
-                    <input
-                        type="text"
-                        value={avatar || ''}
-                        onChange={(e) => setAvatar(e.target.value)}
-                        placeholder="https://imgur.com/..."
-                    />
-                    {avatar && (
-                        <div className="avatar-preview-section">
-                            <img src={avatar} alt="Preview" className="avatar-preview" onError={(e) => e.target.style.display = 'none'} />
-                        </div>
-                    )}
-                </div>
-
-                <div className="form-group">
-                    <label>Linked Accounts</label>
-                    {isTwitterLinked ? (
-                        <div className="linked-badge success">
-                            <Twitter size={16} /> Twitter Linked
-                        </div>
-                    ) : (
-                        <button className="btn-secondary link-btn" onClick={linkTwitter}>
-                            <LinkIcon size={16} /> Link Twitter / X
-                        </button>
-                    )}
-                </div>
-
                 <div className="modal-actions">
-                    <button className="btn-cancel" onClick={onClose}>Cancel</button>
-                    <button className="btn-save" onClick={handleSave} disabled={loading}>
-                        {loading ? 'Saving...' : <><Save size={18} /> Save Changes</>}
+                    <button className="btn-ghost" onClick={onClose}>Cancel</button>
+                    <button className="btn-primary-save" onClick={handleSave} disabled={isSaving || isUploading}>
+                        {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                 </div>
             </div>
