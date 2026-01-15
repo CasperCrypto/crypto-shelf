@@ -65,8 +65,10 @@ create table public.reactions (
   shelf_id uuid references public.shelves(id) on delete cascade not null,
   user_id text references public.profiles(id) on delete cascade,
   type text not null, 
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(shelf_id, user_id)
 );
+
 
 -- Allow everyone to see and add reactions
 alter table public.reactions enable row level security;

@@ -95,20 +95,50 @@ export async function getReactionsForShelf(shelfId) {
 }
 
 export async function saveReaction(shelfId, userId, type) {
-    if (!shelfId || !supabase) return;
+    if (!shelfId || !userId || !supabase) return;
 
-    const { error } = await supabase
+    // 1. Check for existing reaction by this user on this shelf
+    const { data: existing, error: fetchError } = await supabase
         .from('reactions')
-        .insert({
-            shelf_id: shelfId,
-            user_id: userId || null,
-            type: type
-        });
+        .select('id, type')
+        .eq('shelf_id', shelfId)
+        .eq('user_id', userId)
+        .maybeSingle();
 
-    if (error) {
-        console.error("Error saving reaction:", error);
+    if (fetchError) {
+        console.error("Error checking existing reaction:", fetchError);
+        return;
+    }
+
+    if (existing) {
+        // 2. If same type, remove it (toggle off)
+        if (existing.type === type) {
+            const { error: deleteError } = await supabase
+                .from('reactions')
+                .delete()
+                .eq('id', existing.id);
+            if (deleteError) console.error("Error toggling off reaction:", deleteError);
+        } else {
+            // 3. If different type, update it (change reaction)
+            const { error: updateError } = await supabase
+                .from('reactions')
+                .update({ type: type })
+                .eq('id', existing.id);
+            if (updateError) console.error("Error updating reaction:", updateError);
+        }
+    } else {
+        // 4. If no reaction, insert new one
+        const { error: insertError } = await supabase
+            .from('reactions')
+            .insert({
+                shelf_id: shelfId,
+                user_id: userId,
+                type: type
+            });
+        if (insertError) console.error("Error saving reaction:", insertError);
     }
 }
+
 
 export async function getAllShelves() {
     if (!supabase) return [];
