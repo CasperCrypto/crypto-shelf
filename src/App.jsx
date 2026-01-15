@@ -12,7 +12,7 @@ import AdminThemes from './pages/admin/AdminThemes';
 import AdminModeration from './pages/admin/AdminModeration';
 import { useAppStore } from './AppContext';
 import { LayoutGrid, Compass, Trophy, User, ShieldCheck, LogOut } from 'lucide-react';
-import { upsertProfileFromCurrentUser } from './services/profileApi';
+import { upsertProfileFromCurrentUser, getProfile } from './services/profileApi';
 import './App.css';
 
 const Nav = () => {
@@ -79,59 +79,58 @@ function App() {
   const { currentUser, setCurrentUser } = useAppStore();
 
   useEffect(() => {
-    if (ready && authenticated && privyUser) {
-      // Map Privy user to App user
-      const wallet = privyUser.wallet?.address;
-      // Check both direct email auth and Google auth for email
-      const email = privyUser.email?.address || privyUser.google?.email;
-      const twitter = privyUser.twitter?.username;
+    const initUser = async () => {
+      if (ready && authenticated && privyUser) {
+        // Map Privy user to App user
+        const wallet = privyUser.wallet?.address;
+        // Check both direct email auth and Google auth for email
+        const email = privyUser.email?.address || privyUser.google?.email;
+        const twitter = privyUser.twitter?.username;
 
-      console.log("Privy User Debug:", {
-        id: privyUser.id,
-        emailObj: privyUser.email,
-        googleObj: privyUser.google,
-        twitterObj: privyUser.twitter,
-        extractedEmail: email
-      });
+        // Include potential typo variant just in case
+        const ADMIN_EMAILS = ['hermescrypto33@gmail.com', 'hermescrytpo33@gmail.com'];
+        const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
 
-      // Include potential typo variant just in case
-      const ADMIN_EMAILS = ['hermescrypto33@gmail.com', 'hermescrytpo33@gmail.com'];
-      const isAdmin = email && ADMIN_EMAILS.includes(email.toLowerCase());
+        // 1. Check if Supabase has a profile first
+        const dbProfile = await getProfile(privyUser.id);
 
-      let handle = "@anon";
-      if (twitter) {
-        handle = "@" + twitter.replace(/^@/, '');
-      } else if (email) {
-        handle = "@" + email.split("@")[0].replace(/^@/, '');
-      } else if (wallet) {
-        handle = wallet.slice(0, 6);
+        let handle = "@anon";
+        if (twitter) {
+          handle = "@" + twitter.replace(/^@/, '');
+        } else if (email) {
+          handle = "@" + email.split("@")[0].replace(/^@/, '');
+        } else if (wallet) {
+          handle = wallet.slice(0, 6);
+        }
+
+        const mappedUser = {
+          id: privyUser.id,
+          handle: dbProfile?.handle || handle,
+          username: twitter || (email ? email.split("@")[0] : "anon"),
+          avatar: dbProfile?.avatar_url || null,
+          address: wallet,
+          email: email,
+          role: isAdmin ? 'admin' : 'user'
+        };
+
+        const hasChanged = !currentUser ||
+          currentUser.id !== mappedUser.id ||
+          currentUser.role !== mappedUser.role ||
+          currentUser.handle !== mappedUser.handle ||
+          currentUser.avatar !== mappedUser.avatar;
+
+        if (hasChanged) {
+          setCurrentUser(mappedUser);
+          if (!dbProfile) {
+            upsertProfileFromCurrentUser(mappedUser);
+          }
+        }
+      } else if (ready && !authenticated) {
+        if (currentUser) setCurrentUser(null);
       }
+    };
 
-      const mappedUser = {
-        id: privyUser.id,
-        handle: handle,
-        username: twitter || (email ? email.split("@")[0] : "anon"),
-        avatar: null, // Privy doesn't provide avatar by default unless social login
-        address: wallet,
-        email: email,
-        role: isAdmin ? 'admin' : 'user'
-      };
-
-
-
-
-      // ... inside useEffect ...
-      console.log("Mapped User Role:", mappedUser.role);
-
-      // Only update if changed or if role needs updating (fix for existing sessions)
-      if (!currentUser || currentUser.id !== mappedUser.id || currentUser.role !== mappedUser.role) {
-        setCurrentUser(mappedUser);
-        // Sync to Supabase
-        upsertProfileFromCurrentUser(mappedUser);
-      }
-    } else if (ready && !authenticated) {
-      if (currentUser) setCurrentUser(null);
-    }
+    initUser();
   }, [ready, authenticated, privyUser, setCurrentUser, currentUser]);
 
   return (

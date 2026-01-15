@@ -16,3 +16,20 @@ export async function upsertProfileFromCurrentUser(currentUser) {
         console.error("Error upserting profile:", error);
     }
 }
+
+export async function getProfile(userId) {
+    if (!userId || !supabase) return null;
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+    }
+    return data;
+}
+
