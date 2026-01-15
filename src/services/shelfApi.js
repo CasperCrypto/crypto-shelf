@@ -113,27 +113,38 @@ export async function saveReaction(shelfId, userId, type) {
 export async function getAllShelves() {
     if (!supabase) return [];
 
-    // Fetch shelves with user profile, items and reactions
-    const { data, error } = await supabase
+    // 1. Fetch shelves with profiles and items (These have stable relationships)
+    const { data: shelfData, error: shelfError } = await supabase
         .from('shelves')
         .select(`
             *,
             profiles:user_id ( handle, avatar_url, twitter_handle, is_verified ),
-            items:shelf_items ( * ),
-            reactions ( type )
+            items:shelf_items ( * )
         `)
         .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error("Error fetching all shelves:", error);
+    if (shelfError) {
+        console.error("Error fetching all shelves:", shelfError);
         return [];
     }
 
-    // Map to App format
-    return data.map(shelf => {
+    // 2. Fetch all reactions separately (Avoids the schema cache/relationship error)
+    const { data: reactionData, error: reactionError } = await supabase
+        .from('reactions')
+        .select('shelf_id, type');
+
+    if (reactionError) {
+        console.error("Error fetching all reactions:", reactionError);
+    }
+
+    // 3. Map and Merge with reactions
+    return shelfData.map(shelf => {
+        // Filter reactions for this specific shelf
+        const shelfReactions = (reactionData || []).filter(r => r.shelf_id === shelf.id);
+
         // Count reactions by type
         const reactionCounts = {};
-        shelf.reactions?.forEach(r => {
+        shelfReactions.forEach(r => {
             reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1;
         });
 
@@ -152,7 +163,7 @@ export async function getAllShelves() {
                 isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle)
             },
             reactions: reactionCounts,
-            totalReactions: shelf.reactions?.length || 0
+            totalReactions: shelfReactions.length
         };
     });
 }
@@ -191,5 +202,3 @@ export async function getShelfById(shelfId) {
         }
     };
 }
-
-
