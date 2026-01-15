@@ -67,6 +67,11 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     upsert: false
                 });
 
+            if (error) {
+                console.error("Upload Error:", error);
+                throw error;
+            }
+
             if (error) throw error;
 
             // 3. Get Public URL
