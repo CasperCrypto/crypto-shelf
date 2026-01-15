@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAppStore } from '../main';
+import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import ReactionBar from '../components/ReactionBar';
 import { ArrowLeft, Share2 } from 'lucide-react';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppStore } from '../../main';
+import { useAppStore } from '../../AppContext';
 import './AdminThemes.css';
 
 const AdminThemes = () => {

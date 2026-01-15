@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAppStore } from '../main';
+import { useAppStore } from '../AppContext';
 import { Trophy, Medal, Star } from 'lucide-react';
 import './Rankings.css';
 

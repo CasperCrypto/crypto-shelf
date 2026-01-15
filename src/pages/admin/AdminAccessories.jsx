@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAppStore } from '../../main';
+import { useAppStore } from '../../AppContext';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import './AdminAccessories.css';
 

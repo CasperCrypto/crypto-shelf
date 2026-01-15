@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePrivy } from '@privy-io/react-auth';
-import { useAppStore } from '../main';
+import { useAppStore } from '../AppContext';
 import { INITIAL_ACCESSORIES } from '../store/initialData';
 import './Landing.css';
 

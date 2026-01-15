@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppStore } from '../../main';
+import { useAppStore } from '../../AppContext';
 import { EyeOff, Star } from 'lucide-react';
 import './AdminModeration.css';
 
