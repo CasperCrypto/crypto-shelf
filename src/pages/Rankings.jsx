@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../AppContext';
 import { Trophy, Medal, Star } from 'lucide-react';
+import UserIdentity from '../components/UserIdentity';
 import './Rankings.css';
 
 const Rankings = () => {

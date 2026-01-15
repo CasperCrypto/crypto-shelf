@@ -4,6 +4,7 @@ import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import { Search, Flame, Clock, Star } from 'lucide-react';
 import { getAllShelves } from '../services/shelfApi';
+import UserIdentity from '../components/UserIdentity';
 import './Explore.css';
 
 const Explore = () => {

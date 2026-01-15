@@ -4,6 +4,7 @@ import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import ReactionBar from '../components/ReactionBar';
 import { ArrowLeft, Share2 } from 'lucide-react';
+import UserIdentity from '../components/UserIdentity';
 import './ShelfDetail.css';
 
 const ShelfDetail = () => {
