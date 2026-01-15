@@ -10,7 +10,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminAccessories from './pages/admin/AdminAccessories';
 import AdminThemes from './pages/admin/AdminThemes';
 import AdminModeration from './pages/admin/AdminModeration';
-import { useAppStore } from './main';
+import { useAppStore } from './AppContext';
 import { LayoutGrid, Compass, Trophy, User, ShieldCheck, LogOut } from 'lucide-react';
 import { upsertProfileFromCurrentUser } from './services/profileApi';
 import './App.css';

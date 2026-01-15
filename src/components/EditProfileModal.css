@@ -1,0 +1,71 @@
+/* EditProfileModal.css */
+.profile-modal {
+    width: 90%;
+    max-width: 480px;
+}
+
+.input-with-prefix {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 0 16px;
+    transition: border-color 0.2s;
+}
+
+.input-with-prefix:focus-within {
+    border-color: var(--color-primary);
+}
+
+.input-with-prefix .prefix {
+    color: #888;
+    font-weight: 600;
+}
+
+.input-with-prefix input {
+    border: none;
+    background: transparent;
+    padding: 12px 4px;
+    width: 100%;
+    outline: none;
+    font-weight: 600;
+}
+
+.avatar-preview-section {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--color-primary-soft);
+    object-fit: cover;
+}
+
+.linked-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.linked-badge.success {
+    background: #e6fffa;
+    color: #047857;
+    border: 1px solid #047857;
+}
+
+.link-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}

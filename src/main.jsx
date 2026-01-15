@@ -5,9 +5,7 @@ import App from './App.jsx';
 import './index.css';
 import { useStore } from './store/store';
 
-const StoreContext = createContext();
-
-export const useAppStore = () => useContext(StoreContext);
+import { StoreContext, useAppStore } from './AppContext';
 
 const Root = () => {
   const store = useStore();

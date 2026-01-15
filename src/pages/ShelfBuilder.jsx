@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAppStore } from '../main';
+import { useAppStore } from '../AppContext';
 import ShelfCabinet from '../components/ShelfCabinet';
 import AccessoryPicker from '../components/AccessoryPicker';
-import DiscoverLibrary from '../components/DiscoverLibrary'; // NEW IMPORT
-import { Save, Palette, Sparkles } from 'lucide-react';
+import EditProfileModal from '../components/EditProfileModal'; // NEW IMPORT
+
+import { Save, Palette, Sparkles, Edit2 } from 'lucide-react'; // Added Edit2 icon
 import { getShelfForUser, saveShelfForUser } from '../services/shelfApi';
 import './ShelfBuilder.css';
 
@@ -11,10 +12,13 @@ const ShelfBuilder = () => {
     const { currentUser, accessories, themes, shelves, saveShelf } = useAppStore();
     const [myShelf, setMyShelf] = useState(null);
     const [pickerOpen, setPickerOpen] = useState(false);
+    const [profileModalOpen, setProfileModalOpen] = useState(false); // New State
     const [selectedSlot, setSelectedSlot] = useState(null);
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // ... (existing loadShelf logic) ...
         const loadShelf = async () => {
             if (currentUser) {
                 setLoading(true);
@@ -109,7 +113,7 @@ const ShelfBuilder = () => {
 
     // Dynamic background logic
     const pageBg = currentTheme?.pageBackground || '#FFF5EC';
-    console.log("Theme Debug:", { themeId: myShelf.themeId, currentTheme, pageBg });
+    // console.log("Theme Debug:", { themeId: myShelf.themeId, currentTheme, pageBg });
 
 
     return (
@@ -126,8 +130,32 @@ const ShelfBuilder = () => {
                 <div className="user-info">
                     <img src={currentUser.avatar} alt={currentUser.handle} className="avatar" />
                     <div>
-                        <h1>My Shelf</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <h1>My Shelf</h1>
+                            <button
+                                className="btn-edit-profile"
+                                onClick={() => {
+                                    console.log("Opening Edit Profile Modal");
+                                    setProfileModalOpen(true);
+                                }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '6px 12px',
+                                    borderRadius: '20px',
+                                    border: '1px solid #ccc',
+                                    background: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                <Edit2 size={14} /> Edit Profile
+                            </button>
+                        </div>
                         <p>Customize your 2x4 identity grid</p>
+
                     </div>
                 </div>
                 <button className="btn-save" onClick={handleSave}>
@@ -175,6 +203,11 @@ const ShelfBuilder = () => {
                 onClose={() => setPickerOpen(false)}
                 accessories={accessories}
                 onSelect={handleAccessorySelect}
+            />
+
+            <EditProfileModal
+                isOpen={profileModalOpen}
+                onClose={() => setProfileModalOpen(false)}
             />
         </div>
     );
