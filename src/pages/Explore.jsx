@@ -82,12 +82,16 @@ const Explore = () => {
                             </div>
                             <div className="shelf-card-info">
                                 <div className="reactions-summary">
-                                    <span>🔥 {getReactionCount(shelf.id)}</span>
+                                    <div className="reaction-stat">
+                                        <Flame size={14} fill="var(--color-accent)" stroke="var(--color-accent)" />
+                                        <span>{shelf.totalReactions || 0} Total Reactions</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ))
                 )}
+
             </div>
         </div>
     );

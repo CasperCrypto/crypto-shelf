@@ -34,3 +34,32 @@ export async function getProfile(userId) {
     return data;
 }
 
+export async function updateProfile(userId, updates) {
+    if (!userId || !supabase) return;
+
+    const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId);
+
+    if (error) {
+        console.error("Error updating profile:", error);
+    }
+}
+
+export async function getAllProfiles() {
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching all profiles:", error);
+        return [];
+    }
+    return data;
+}
+
+

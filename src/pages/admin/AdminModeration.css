@@ -7,3 +7,86 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Inherits from AdminAccessories table styles, */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-table th {
+    background: #f8f9fa;
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+.profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.hidden {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.mod-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.mod-btn.hide {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.mod-btn.reveal {
+    background: var(--color-accent);
+    color: white;
+}
+
+.hidden-row {
+    background: #fafafa;
+}
+
+.hidden-row td {
+    color: #bbb;
+}

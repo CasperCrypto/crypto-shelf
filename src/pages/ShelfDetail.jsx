@@ -14,6 +14,7 @@ const ShelfDetail = () => {
     const { accessories, themes } = useAppStore();
     const [shelf, setShelf] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const fetchShelf = async () => {
@@ -23,13 +24,26 @@ const ShelfDetail = () => {
                 setShelf(data);
             } catch (error) {
                 console.error("Failed to fetch shelf:", error);
-                setShelf(null); // Ensure shelf is null if fetch fails
+                setShelf(null);
             } finally {
                 setLoading(false);
             }
         };
         fetchShelf();
     }, [id]);
+
+    const handleShareX = () => {
+        const url = window.location.href;
+        const text = `Check out my Crypto Shelf! 💎🔥 curated by @${shelf?.user?.handle || 'CryptoShelf'}`;
+        const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        window.open(xUrl, '_blank');
+    };
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     if (loading) return <div className="loading">Loading shelf...</div>;
     if (!shelf) return <div className="loading">Shelf not found</div>;
@@ -39,7 +53,7 @@ const ShelfDetail = () => {
     return (
         <div className="detail-page container">
             <header className="detail-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+                <button className="back-btn" onClick={() => navigate(-1)} title="Back">
                     <ArrowLeft size={24} />
                 </button>
                 <div className="owner-meta">
@@ -52,9 +66,15 @@ const ShelfDetail = () => {
                         showTwitter={true}
                     />
                 </div>
-                <button className="share-btn">
-                    <Share2 size={24} />
-                </button>
+                <div className="detail-actions">
+                    <button className="share-btn x-btn" onClick={handleShareX} title="Share on X">
+                        <Share2 size={20} />
+                        <span>Share on X</span>
+                    </button>
+                    <button className="share-btn copy-btn" onClick={handleCopyLink} title="Copy Link">
+                        {copied ? 'Copied!' : 'Copy Link'}
+                    </button>
+                </div>
             </header>
 
             <div className="detail-hero">

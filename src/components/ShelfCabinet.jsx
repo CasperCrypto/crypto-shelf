@@ -5,8 +5,13 @@ import './ShelfCabinet.css';
 const ShelfCabinet = ({ shelf, items, accessories, onSlotClick, readOnly = false }) => {
     const findItem = (itemId) => accessories.find(a => a.id === itemId);
 
+    const cabinetStyle = {
+        '--theme-bg': shelf.theme?.type === 'IMAGE' ? 'transparent' : (shelf.theme?.value || 'var(--grad-sky)'),
+        '--theme-img': shelf.theme?.type === 'IMAGE' ? `url(${shelf.theme.imageUrl})` : 'none'
+    };
+
     return (
-        <div className="shelf-cabinet-container" style={{ '--theme-bg': shelf.theme?.bgValue || 'var(--grad-sky)' }}>
+        <div className="shelf-cabinet-container" style={cabinetStyle}>
             <div className="shelf-background" />
 
             <div className="cabinet-frame" style={{ borderColor: shelf.shelfColor || 'var(--cabinet-wood)' }}>

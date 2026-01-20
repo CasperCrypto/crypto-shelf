@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { INITIAL_ACCESSORIES, INITIAL_THEMES, MOCK_SHELVES, MOCK_USERS } from './initialData';
+import { getAccessories, getThemes } from '../services/shelfApi';
 
 // Helper to load from localStorage
 const load = (key, defaultValue) => {
@@ -14,16 +15,28 @@ const save = (key, value) => {
 
 export const useStore = () => {
     const [currentUser, setCurrentUser] = useState(null);
-    const [accessories, setAccessories] = useState(load('accessories', INITIAL_ACCESSORIES));
-    const [themes, setThemes] = useState(load('themes', INITIAL_THEMES));
+    const [accessories, setAccessories] = useState(INITIAL_ACCESSORIES);
+    const [themes, setThemes] = useState(INITIAL_THEMES);
     const [shelves, setShelves] = useState(load('shelves', MOCK_SHELVES));
     const [reactions, setReactions] = useState(load('reactions', []));
 
-    // Persistence
-    useEffect(() => save('accessories', accessories), [accessories]);
-    useEffect(() => save('themes', themes), [themes]);
+    // Fetch dynamic assets from Supabase on mount
+    useEffect(() => {
+        const fetchAssets = async () => {
+            const [accData, themeData] = await Promise.all([
+                getAccessories(),
+                getThemes()
+            ]);
+            if (accData.length > 0) setAccessories(accData);
+            if (themeData.length > 0) setThemes(themeData);
+        };
+        fetchAssets();
+    }, []);
+
+    // Persistence only for local/state-heavy items
     useEffect(() => save('shelves', shelves), [shelves]);
     useEffect(() => save('reactions', reactions), [reactions]);
+
 
     // Auth logic handled by Privy in App.jsx, store just holds state
     const logout = () => setCurrentUser(null);

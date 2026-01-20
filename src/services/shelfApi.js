@@ -144,14 +144,17 @@ export async function getAllShelves() {
     if (!supabase) return [];
 
     // 1. Fetch shelves with profiles and items (These have stable relationships)
+    // We filter shelves where the associated profile is NOT hidden
     const { data: shelfData, error: shelfError } = await supabase
         .from('shelves')
         .select(`
             *,
-            profiles:user_id ( handle, avatar_url, twitter_handle, is_verified ),
+            profiles:user_id!inner ( handle, avatar_url, twitter_handle, is_verified, is_hidden ),
             items:shelf_items ( * )
         `)
+        .eq('profiles.is_hidden', false)
         .order('created_at', { ascending: false });
+
 
     if (shelfError) {
         console.error("Error fetching all shelves:", shelfError);
@@ -232,3 +235,33 @@ export async function getShelfById(shelfId) {
         }
     };
 }
+
+export async function getAccessories() {
+    if (!supabase) return [];
+    const { data, error } = await supabase
+        .from('accessories')
+        .select('*')
+        .eq('is_active', true)
+        .order('category', { ascending: true });
+
+    if (error) {
+        console.error("Error fetching accessories:", error);
+        return [];
+    }
+    return data;
+}
+
+export async function getThemes() {
+    if (!supabase) return [];
+    const { data, error } = await supabase
+        .from('themes')
+        .select('*')
+        .eq('is_active', true);
+
+    if (error) {
+        console.error("Error fetching themes:", error);
+        return [];
+    }
+    return data;
+}
+
