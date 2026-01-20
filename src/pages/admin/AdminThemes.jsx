@@ -12,13 +12,14 @@ const AdminThemes = () => {
         value: '',
         frameColor: '#5D4037',
         pageBackground: '#f5f5f5',
-        imageUrl: ''
+        imageUrl: '',
+        frameImageUrl: ''
     });
 
     const handleAdd = () => {
-        if (!newTheme.name || (!newTheme.value && !newTheme.imageUrl)) return;
+        if (!newTheme.name) return;
         addTheme(newTheme);
-        setNewTheme({ name: '', type: 'GRADIENT', value: '', frameColor: '#5D4037', pageBackground: '#f5f5f5', imageUrl: '' });
+        setNewTheme({ name: '', type: 'GRADIENT', value: '', frameColor: '#5D4037', pageBackground: '#f5f5f5', imageUrl: '', frameImageUrl: '' });
         setIsAdding(false);
     };
 
@@ -46,35 +47,43 @@ const AdminThemes = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Type</label>
+                            <label>Background Type</label>
                             <select value={newTheme.type} onChange={e => setNewTheme({ ...newTheme, type: e.target.value })}>
-                                <option value="GRADIENT">Colors / Gradient</option>
-                                <option value="IMAGE">Graphic / Image</option>
+                                <option value="GRADIENT">Gradient/Solid</option>
+                                <option value="IMAGE">Full Graphic BG</option>
                             </select>
                         </div>
-                        {newTheme.type === 'GRADIENT' ? (
-                            <div className="form-group">
-                                <label>Gradient/Color Value</label>
-                                <input
-                                    type="text"
-                                    value={newTheme.value}
-                                    onChange={e => setNewTheme({ ...newTheme, value: e.target.value })}
-                                    placeholder="linear-gradient(...)"
-                                />
-                            </div>
-                        ) : (
-                            <div className="form-group">
-                                <label>Image URL</label>
-                                <input
-                                    type="text"
-                                    value={newTheme.imageUrl}
-                                    onChange={e => setNewTheme({ ...newTheme, imageUrl: e.target.value })}
-                                    placeholder="https://..."
-                                />
-                            </div>
-                        )}
                         <div className="form-group">
-                            <label>Frame Color</label>
+                            <label>Background Value (Color/URL)</label>
+                            <input
+                                type="text"
+                                value={newTheme.type === 'IMAGE' ? newTheme.imageUrl : newTheme.value}
+                                onChange={e => setNewTheme({
+                                    ...newTheme,
+                                    [newTheme.type === 'IMAGE' ? 'imageUrl' : 'value']: e.target.value
+                                })}
+                                placeholder={newTheme.type === 'IMAGE' ? "https://..." : "linear-gradient(...)"}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Page BG Color (Fallback)</label>
+                            <input
+                                type="color"
+                                value={newTheme.pageBackground}
+                                onChange={e => setNewTheme({ ...newTheme, pageBackground: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group span-2">
+                            <label>Shelf Frame Image URL (Premium Skins)</label>
+                            <input
+                                type="text"
+                                value={newTheme.frameImageUrl}
+                                onChange={e => setNewTheme({ ...newTheme, frameImageUrl: e.target.value })}
+                                placeholder="https://... (e.g. Wood Classic image)"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Frame Accent Color</label>
                             <input
                                 type="color"
                                 value={newTheme.frameColor}
@@ -93,11 +102,16 @@ const AdminThemes = () => {
                             className="theme-preview"
                             style={{
                                 background: theme.type === 'IMAGE' ? `url(${theme.imageUrl}) center/cover` : theme.value,
-                                backgroundColor: theme.type === 'GRADIENT' ? theme.value : 'transparent'
+                                backgroundColor: theme.pageBackground || theme.value,
+                                border: theme.frameImageUrl ? 'none' : `3px solid ${theme.frameColor}`
                             }}
                         >
-                            {theme.type === 'IMAGE' ? <ImageIcon size={20} /> : <Palette size={20} />}
+                            {theme.frameImageUrl && (
+                                <img src={theme.frameImageUrl} alt="" className="frame-preview-img" />
+                            )}
+                            {theme.type === 'IMAGE' ? <ImageIcon size={20} className="type-icon" /> : <Palette size={20} className="type-icon" />}
                         </div>
+
                         <div className="theme-info">
                             <h3>{theme.name}</h3>
                             <button className="delete-btn" onClick={() => deleteTheme(theme.id)}>

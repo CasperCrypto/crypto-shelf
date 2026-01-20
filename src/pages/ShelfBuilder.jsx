@@ -182,12 +182,22 @@ const ShelfBuilder = () => {
                                     key={t.id}
                                     className={`theme-card ${myShelf.themeId === t.id ? 'active' : ''}`}
                                     onClick={() => changeTheme(t.id)}
-                                    style={{ background: t.bgValue }}
+                                    style={{
+                                        background: t.type === 'IMAGE' ? `url(${t.imageUrl}) center/cover` : t.value,
+                                        backgroundColor: t.pageBackground || t.value,
+                                        border: t.frameImageUrl ? 'none' : undefined
+                                    }}
                                 >
-                                    <span>{t.name}</span>
+                                    {t.frameImageUrl && (
+                                        <img src={t.frameImageUrl} alt="" className="theme-card-frame" />
+                                    )}
+                                    <div className="theme-card-label">
+                                        <span>{t.name}</span>
+                                    </div>
                                 </button>
                             ))}
                         </div>
+
                     </section>
 
                     {/* REPLACED Slot Management with DiscoverLibrary */}

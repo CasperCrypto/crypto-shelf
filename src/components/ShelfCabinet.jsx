@@ -6,15 +6,18 @@ const ShelfCabinet = ({ shelf, items, accessories, onSlotClick, readOnly = false
     const findItem = (itemId) => accessories.find(a => a.id === itemId);
 
     const cabinetStyle = {
-        '--theme-bg': shelf.theme?.type === 'IMAGE' ? 'transparent' : (shelf.theme?.value || 'var(--grad-sky)'),
-        '--theme-img': shelf.theme?.type === 'IMAGE' ? `url(${shelf.theme.imageUrl})` : 'none'
+        '--theme-bg': shelf.theme?.page_background || shelf.theme?.value || 'var(--grad-sky)',
+        '--theme-img': shelf.theme?.type === 'IMAGE' ? `url(${shelf.theme.imageUrl})` : 'none',
+        '--frame-img': shelf.theme?.frame_image_url ? `url(${shelf.theme.frame_image_url})` : 'none',
+        '--frame-color': shelf.shelfColor || shelf.theme?.frame_color || 'var(--cabinet-wood)'
     };
 
     return (
         <div className="shelf-cabinet-container" style={cabinetStyle}>
             <div className="shelf-background" />
 
-            <div className="cabinet-frame" style={{ borderColor: shelf.shelfColor || 'var(--cabinet-wood)' }}>
+            <div className={`cabinet-frame ${shelf.theme?.frame_image_url ? 'has-custom-frame' : ''}`} style={{ borderColor: 'var(--frame-color)' }}>
+
                 <div className="grid-2x4">
                     {Array.from({ length: 8 }).map((_, idx) => {
                         const slot = shelf.slots?.find(s => s.index === idx);

@@ -99,9 +99,16 @@ export const useStore = () => {
     const updateAccessory = (acc) => setAccessories(prev => prev.map(a => a.id === acc.id ? acc : a));
     const deleteAccessory = (id) => setAccessories(prev => prev.filter(a => a.id !== id));
 
-    const addTheme = (theme) => setThemes(prev => [...prev, { ...theme, id: Date.now().toString() }]);
+    const addTheme = async (theme) => {
+        setThemes(prev => [...prev, { ...theme, id: Date.now().toString() }]);
+        await saveTheme(theme);
+    };
     const updateTheme = (id, patch) => setThemes(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
-    const deleteTheme = (id) => setThemes(prev => prev.filter(t => t.id !== id));
+    const deleteTheme = async (id) => {
+        setThemes(prev => prev.filter(t => t.id !== id));
+        await deleteThemeFromDB(id);
+    };
+
 
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 

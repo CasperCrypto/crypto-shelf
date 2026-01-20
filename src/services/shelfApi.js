@@ -262,6 +262,48 @@ export async function getThemes() {
         console.error("Error fetching themes:", error);
         return [];
     }
-    return data;
+    return data.map(t => ({
+        id: t.id,
+        name: t.name,
+        type: t.type,
+        value: t.value,
+        frameColor: t.frame_color,
+        pageBackground: t.page_background,
+        imageUrl: t.image_url,
+        frameImageUrl: t.frame_image_url,
+        isActive: t.is_active
+    }));
 }
 
+
+export async function saveTheme(theme) {
+    if (!supabase) return;
+
+    const dbTheme = {
+        name: theme.name,
+        type: theme.type,
+        value: theme.value,
+        frame_color: theme.frameColor,
+        page_background: theme.pageBackground,
+        image_url: theme.imageUrl,
+        frame_image_url: theme.frameImageUrl,
+        is_active: true
+    };
+
+    const { error } = await supabase
+        .from('themes')
+        .upsert(dbTheme, { onConflict: 'name' }); // Using name as conflict key if ID isn't provided
+
+    if (error) {
+        console.error("Error saving theme:", error);
+    }
+}
+
+export async function deleteThemeFromDB(id) {
+    if (!supabase) return;
+    const { error } = await supabase
+        .from('themes')
+        .delete()
+        .eq('id', id);
+    if (error) console.error("Error deleting theme:", error);
+}
