@@ -36,8 +36,8 @@ export const INITIAL_SKINS = [
   { id: 'classic', name: 'Classic', imagePath: 'assets/skins/wood_shelf.png', frameColor: '#8B5E3C' },
   { id: 'gold', name: 'Gold', imagePath: 'assets/skins/gold_shelf.png', frameColor: '#D4AF37' },
   { id: 'pink', name: 'Pink', imagePath: 'assets/skins/pink_shelf.png', frameColor: '#F48FB1' },
-  { id: 'mystic', name: 'Mystic', imagePath: 'assets/skins/ice_shelf.jpg', frameColor: '#2E7D32' },
-  { id: 'diamond', name: 'Diamond', imagePath: 'assets/skins/mystic_shelf.png', frameColor: '#A5D6A7' },
+  { id: 'mystic', name: 'Mystic', imagePath: 'assets/skins/mystic_shelf.png', frameColor: '#2E7D32' },
+  { id: 'diamond', name: 'Diamond', imagePath: 'assets/skins/ice_shelf.jpg', frameColor: '#A5D6A7' },
 ];
 
 

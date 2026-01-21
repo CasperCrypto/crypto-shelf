@@ -365,3 +365,22 @@ export async function deleteSkinFromDB(id) {
         .eq('id', id);
     if (error) console.error("Error deleting skin:", error);
 }
+
+export async function uploadSkinImage(file) {
+    if (!supabase || !file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `skins/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('assets') // Assuming 'assets' bucket exists, else 'public' or 'skins'
+        .upload(filePath, file);
+
+    if (uploadError) {
+        console.error("Error uploading skin:", uploadError);
+        return null;
+    }
+
+    return filePath;
+}

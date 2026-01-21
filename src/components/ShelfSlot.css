@@ -4,6 +4,9 @@
     aspect-ratio: 1;
     cursor: pointer;
     transition: all 0.2s ease;
+    z-index: 10;
+    /* Ensure it floats above potential overlays */
+    pointer-events: auto;
 }
 
 .shelf-slot:hover:not(.read-only) {

@@ -12,8 +12,8 @@ INSERT INTO public.skins (id, name, type, frame_color, image_path, image_url) VA
 ('classic', 'Classic', 'IMAGE', '#8B5E3C', 'assets/skins/wood_shelf.png', ''),
 ('gold', 'Gold', 'IMAGE', '#D4AF37', 'assets/skins/gold_shelf.png', ''),
 ('pink', 'Pink', 'IMAGE', '#F48FB1', 'assets/skins/pink_shelf.png', ''),
-('mystic', 'Mystic', 'IMAGE', '#2E7D32', 'assets/skins/ice_shelf.jpg', ''), -- Swapped per user request
-('diamond', 'Diamond', 'IMAGE', '#A5D6A7', 'assets/skins/mystic_shelf.png', ''); -- Swapped per user request
+('mystic', 'Mystic', 'IMAGE', '#2E7D32', 'assets/skins/mystic_shelf.png', ''), -- Green/Nature
+('diamond', 'Diamond', 'IMAGE', '#A5D6A7', 'assets/skins/ice_shelf.jpg', ''); -- Blue/Ice
 
 -- 4. Update existing shelves to default 'classic' if they point to old/deleted skins
 UPDATE public.shelves 

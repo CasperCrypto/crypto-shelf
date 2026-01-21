@@ -16,21 +16,35 @@ const resolveImg = (item) => {
 
 
 const AdminSkins = () => {
-    const { skins, addSkin, deleteSkin } = useAppStore();
-    const [isAdding, setIsAdding] = useState(false);
-    const [newSkin, setNewSkin] = useState({
-        name: '',
-        imageUrl: '',
-        imagePath: '',
-        frameColor: '#8B5E3C'
-    });
+    const [uploading, setUploading] = useState(false);
 
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const { uploadSkinImage } = await import('../../services/shelfApi');
+            const path = await uploadSkinImage(file);
+            if (path) {
+                setNewSkin({ ...newSkin, imagePath: path });
+            } else {
+                alert("Upload failed. Check console.");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleAdd = () => {
-        if (!newSkin.name || !newSkin.imageUrl) return;
+        if (!newSkin.name) {
+            alert("Name is required");
+            return;
+        }
         addSkin(newSkin);
         setNewSkin({ name: '', imageUrl: '', imagePath: '', frameColor: '#8B5E3C' });
-
         setIsAdding(false);
     };
 
@@ -58,28 +72,31 @@ const AdminSkins = () => {
                                 onChange={e => setNewSkin({ ...newSkin, name: e.target.value })}
                                 placeholder="e.g. Cyber Metal"
                             />
+                        </div>
 
-                        </div>
                         <div className="form-group span-2">
-                            <label>Background Image Path (assets/skins/...)</label>
-                            <input
-                                id="skin-path"
-                                name="imagePath"
-                                type="text"
-                                value={newSkin.imagePath}
-                                onChange={e => setNewSkin({ ...newSkin, imagePath: e.target.value })}
-                                placeholder="assets/skins/my_shelf.jpg"
-                            />
+                            <label>Upload Skin Image (PNG/JPG)</label>
+                            <div className="file-upload-wrapper">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    disabled={uploading}
+                                />
+                                {uploading && <span>Uploading...</span>}
+                            </div>
+                            {newSkin.imagePath && <small className="success-text">✓ Image uploaded: {newSkin.imagePath}</small>}
                         </div>
+
                         <div className="form-group span-2">
-                            <label>OR Full URL Fallback</label>
+                            <label>OR External URL (Optional)</label>
                             <input
                                 id="skin-url"
                                 name="imageUrl"
                                 type="text"
                                 value={newSkin.imageUrl}
                                 onChange={e => setNewSkin({ ...newSkin, imageUrl: e.target.value })}
-                                placeholder="https://... (Designer JPG)"
+                                placeholder="https://..."
                             />
                         </div>
 
@@ -92,7 +109,9 @@ const AdminSkins = () => {
                             />
                         </div>
                     </div>
-                    <button className="submit-btn" onClick={handleAdd}>Save Skin</button>
+                    <button className="submit-btn" onClick={handleAdd} disabled={uploading}>
+                        {uploading ? 'Uploading...' : 'Save Skin'}
+                    </button>
                 </div>
             )}
 

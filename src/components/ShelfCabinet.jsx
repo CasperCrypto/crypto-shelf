@@ -20,8 +20,8 @@ const ShelfCabinet = ({ shelf, items, accessories, onSlotClick, readOnly = false
             'classic': '/assets/skins/wood_shelf.png',
             'gold': '/assets/skins/gold_shelf.png',
             'pink': '/assets/skins/pink_shelf.png',
-            'mystic': '/assets/skins/ice_shelf.jpg',
-            'diamond': '/assets/skins/mystic_shelf.png'
+            'mystic': '/assets/skins/mystic_shelf.png',
+            'diamond': '/assets/skins/ice_shelf.jpg'
         };
 
         if (localSkins[item.id]) return localSkins[item.id];
