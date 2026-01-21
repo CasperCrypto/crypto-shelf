@@ -11,7 +11,8 @@ import './ShelfDetail.css';
 const ShelfDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { accessories, themes } = useAppStore();
+    const { accessories, themes, skins } = useAppStore();
+
     const [shelf, setShelf] = useState(null);
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
@@ -49,6 +50,8 @@ const ShelfDetail = () => {
     if (!shelf) return <div className="loading">Shelf not found</div>;
 
     const theme = themes.find(t => t.id === shelf.themeId);
+    const skin = skins.find(s => s.id === shelf.skinId);
+
 
     return (
         <div className="detail-page container">
@@ -79,7 +82,8 @@ const ShelfDetail = () => {
 
             <div className="detail-hero">
                 <ShelfCabinet
-                    shelf={{ ...shelf, theme }}
+                    shelf={{ ...shelf, theme, skin }}
+
                     accessories={accessories}
                     readOnly={true}
                 />

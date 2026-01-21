@@ -1,0 +1,68 @@
+.admin-skins {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.skins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.skin-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+    transition: transform 0.2s;
+}
+
+.skin-card:hover {
+    transform: translateY(-4px);
+}
+
+.skin-preview {
+    height: 180px;
+    position: relative;
+    border-bottom: 1px solid #eee;
+}
+
+.skin-preview .type-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: white;
+    padding: 6px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: var(--color-primary);
+}
+
+.skin-info {
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skin-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-text);
+}
+
+.admin-form-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    border: 2px dashed #ccc;
+    background: #fafafa;
+}
+
+.admin-form-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--color-primary);
+}

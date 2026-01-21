@@ -9,8 +9,43 @@ import { Save, Palette, Sparkles, Edit2 } from 'lucide-react'; // Added Edit2 ic
 import { getShelfForUser, saveShelfForUser } from '../services/shelfApi';
 import './ShelfBuilder.css';
 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const resolveImg = (item) => {
+    if (!item) return '';
+    // Prioritize local assets for game designer skins
+    const localSkins = {
+        'classic': '/assets/skins/wood_shelf.png',
+        'gold': '/assets/skins/gold_shelf.png',
+        'pink': '/assets/skins/pink_shelf.png',
+        'mystic': '/assets/skins/ice_shelf.jpg',
+        'diamond': '/assets/skins/mystic_shelf.png'
+    };
+
+    if (localSkins[item.id]) return localSkins[item.id];
+
+    const imgUrl = item.imageUrl || item.image_url || '';
+    const imgPath = item.imagePath || item.image_path || '';
+
+    if (imgUrl) {
+        return imgUrl.replace('jylfjrjrvpuxyqyqyqyq', 'jylfjrjrvpuxyqyqyq');
+    }
+    if (imgPath && supabaseUrl) {
+        return `${supabaseUrl}/storage/v1/object/public/${imgPath}`;
+    }
+    // Fallback for relative paths already in path format
+    if (imgPath && (imgPath.startsWith('assets/') || imgPath.startsWith('/assets/'))) {
+        return imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
+    }
+    return '';
+};
+
+
+
+
+
 const ShelfBuilder = () => {
-    const { currentUser, accessories, themes, shelves, saveShelf } = useAppStore();
+    const { currentUser, accessories, themes, skins, shelves, saveShelf } = useAppStore();
+
     const [myShelf, setMyShelf] = useState(null);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [profileModalOpen, setProfileModalOpen] = useState(false); // New State
@@ -28,7 +63,7 @@ const ShelfBuilder = () => {
 
                 if (dbShelf) {
                     // Reconstruct shelf from DB data
-                    const slots = Array.from({ length: 8 }).map((_, i) => {
+                    const slots = Array.from({ length: 15 }).map((_, i) => {
                         const item = dbItems.find(item => item.slot_index === i);
                         return { index: i, itemId: item ? item.item_key : null };
                     });
@@ -37,6 +72,9 @@ const ShelfBuilder = () => {
                         id: dbShelf.id,
                         userId: currentUser.id,
                         themeId: dbShelf.theme_id || 'dawn',
+                        skinId: dbShelf.skin_id || 'classic_wood',
+
+
                         slots,
                         reactions: {},
                         user: currentUser
@@ -51,7 +89,10 @@ const ShelfBuilder = () => {
                             id: `s-${currentUser.id}`,
                             userId: currentUser.id,
                             themeId: 'dawn',
-                            slots: Array.from({ length: 8 }).map((_, i) => ({ index: i, itemId: null })),
+                            skinId: 'classic_wood',
+
+
+                            slots: Array.from({ length: 15 }).map((_, i) => ({ index: i, itemId: null })),
                             reactions: {},
                             user: currentUser
                         };
@@ -93,9 +134,16 @@ const ShelfBuilder = () => {
         setMyShelf({ ...myShelf, themeId });
     };
 
+    const changeSkin = (skinId) => {
+        setMyShelf({ ...myShelf, skinId });
+    };
+
+
     const randomizeShelf = () => {
-        const randomSlots = Array.from({ length: 8 }).map((_, i) => {
+        const randomSlots = Array.from({ length: 15 }).map((_, i) => {
             const activeAccs = accessories.filter(a => a.isActive && !a.isPhotoFrame);
+            if (activeAccs.length === 0) return { index: i, itemId: null };
+
             const randomAcc = activeAccs[Math.floor(Math.random() * activeAccs.length)];
             return { index: i, itemId: Math.random() > 0.3 ? randomAcc.id : null };
         });
@@ -106,14 +154,21 @@ const ShelfBuilder = () => {
         // Save locally to update UI immediately
         saveShelf(myShelf);
         // Persist to Supabase
-        await saveShelfForUser(currentUser.id, { themeId: myShelf.themeId, slots: myShelf.slots });
+        await saveShelfForUser(currentUser.id, {
+            themeId: myShelf.themeId,
+            skinId: myShelf.skinId,
+            slots: myShelf.slots
+        });
+
         alert("Shelf saved!");
     };
 
     const currentTheme = themes.find(t => t.id === myShelf.themeId);
+    const currentSkin = skins.find(s => s.id === myShelf.skinId);
 
     // Dynamic background logic
     const pageBg = currentTheme?.pageBackground || '#FFF5EC';
+
     // console.log("Theme Debug:", { themeId: myShelf.themeId, currentTheme, pageBg });
 
 
@@ -121,10 +176,9 @@ const ShelfBuilder = () => {
         <div
             className="builder-page container"
             style={{
-                background: pageBg,
-                transition: 'background 220ms ease-out',
-                minHeight: 'calc(100vh - 80px)', // ensure full height coverage
-                borderRadius: '16px' // Optional polish so it looks like a contained app
+                background: '#FFF5EC', // Fixed brand background
+                minHeight: 'calc(100vh - 80px)',
+                borderRadius: '16px'
             }}
         >
             <header className="builder-header">
@@ -167,38 +221,75 @@ const ShelfBuilder = () => {
             <div className="builder-layout">
                 <div className="shelf-column">
                     <ShelfCabinet
-                        shelf={{ ...myShelf, theme: currentTheme }}
+                        shelf={{ ...myShelf, theme: currentTheme, skin: currentSkin }}
                         accessories={accessories}
                         onSlotClick={handleSlotClick}
                     />
+
                 </div>
 
                 <div className="controls-column">
                     <section className="control-section">
-                        <h3><Palette size={20} /> Select Theme</h3>
+                        <h3><Palette size={20} /> 1. Choose Backdrop</h3>
                         <div className="theme-grid">
-                            {themes.map(t => (
+                            {themes.filter(Boolean).map(t => (
                                 <button
                                     key={t.id}
                                     className={`theme-card ${myShelf.themeId === t.id ? 'active' : ''}`}
                                     onClick={() => changeTheme(t.id)}
                                     style={{
-                                        background: t.type === 'IMAGE' ? `url(${t.imageUrl}) center/cover` : t.value,
-                                        backgroundColor: t.pageBackground || t.value,
-                                        border: t.frameImageUrl ? 'none' : undefined
+                                        background: t.type === 'IMAGE' ? `url(${resolveImg(t)}) center/cover` : t.value,
+                                        backgroundColor: t.pageBackground || t.value
                                     }}
+
                                 >
-                                    {t.frameImageUrl && (
-                                        <img src={t.frameImageUrl} alt="" className="theme-card-frame" />
-                                    )}
                                     <div className="theme-card-label">
                                         <span>{t.name}</span>
                                     </div>
                                 </button>
                             ))}
-                        </div>
 
+                        </div>
                     </section>
+
+                    <section className="control-section">
+                        <h3><Sparkles size={20} /> 2. Choose Shelf Skin</h3>
+                        <div className="theme-grid">
+                            {skins.filter(Boolean).map(s => {
+                                const isCss = s.id?.startsWith('css-');
+                                const skinUrl = isCss ? '' : resolveImg(s);
+
+                                return (
+                                    <button
+                                        key={s.id}
+                                        className={`theme-card ${myShelf.skinId === s.id ? 'active' : ''}`}
+                                        onClick={() => changeSkin(s.id)}
+                                        style={{
+                                            background: skinUrl ? `url(${skinUrl}) center/cover no-repeat` : s.frameColor,
+                                            // Fallback color logic handled in CSS/Cabinet, here it's just for selection
+                                        }}
+                                    >
+                                        {!isCss ? (
+                                            <img src={resolveImg(s)} alt="" className="theme-card-frame" style={{ display: 'none' }} />
+                                        ) : (
+                                            <div className={`skin-preview-overlay ${s.id}`} style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                border: '2px solid rgba(255,255,255,0.3)',
+                                                borderRadius: '8px'
+                                            }} />
+                                        )}
+
+                                        <div className="theme-card-label">
+                                            <span>{s.name}</span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+
+                        </div>
+                    </section>
+
 
                     {/* REPLACED Slot Management with DiscoverLibrary */}
                     <DiscoverLibrary accessories={accessories} />

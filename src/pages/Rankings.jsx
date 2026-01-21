@@ -37,7 +37,8 @@ const Rankings = () => {
             </div>
 
             <div className="rankings-list">
-                {communityShelves.map((shelf, idx) => {
+                {communityShelves.filter(s => s && s.id).map((shelf, idx) => {
+
                     return (
                         <div
                             key={shelf.id}

@@ -3,6 +3,18 @@ import { useAppStore } from '../../AppContext';
 import { Plus, Trash2, Image as ImageIcon, Palette } from 'lucide-react';
 import './AdminThemes.css';
 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+const resolveImg = (item) => {
+    if (!item) return '';
+    if (item.imageUrl) return item.imageUrl;
+    if (item.imagePath && supabaseUrl) {
+        return `${supabaseUrl}/storage/v1/object/public/${item.imagePath}`;
+    }
+    return '';
+};
+
+
 const AdminThemes = () => {
     const { themes, addTheme, deleteTheme } = useAppStore();
     const [isAdding, setIsAdding] = useState(false);
@@ -10,16 +22,17 @@ const AdminThemes = () => {
         name: '',
         type: 'GRADIENT',
         value: '',
-        frameColor: '#5D4037',
         pageBackground: '#f5f5f5',
         imageUrl: '',
-        frameImageUrl: ''
+        imagePath: ''
     });
+
 
     const handleAdd = () => {
         if (!newTheme.name) return;
         addTheme(newTheme);
-        setNewTheme({ name: '', type: 'GRADIENT', value: '', frameColor: '#5D4037', pageBackground: '#f5f5f5', imageUrl: '', frameImageUrl: '' });
+        setNewTheme({ name: '', type: 'GRADIENT', value: '', pageBackground: '#f5f5f5', imageUrl: '', imagePath: '' });
+
         setIsAdding(false);
     };
 
@@ -40,54 +53,42 @@ const AdminThemes = () => {
                         <div className="form-group">
                             <label>Display Name</label>
                             <input
+                                id="theme-name"
+                                name="name"
                                 type="text"
                                 value={newTheme.name}
                                 onChange={e => setNewTheme({ ...newTheme, name: e.target.value })}
                                 placeholder="e.g. Neon Cyber"
                             />
+
                         </div>
                         <div className="form-group">
                             <label>Background Type</label>
-                            <select value={newTheme.type} onChange={e => setNewTheme({ ...newTheme, type: e.target.value })}>
+                            <select id="theme-type" name="type" value={newTheme.type} onChange={e => setNewTheme({ ...newTheme, type: e.target.value })}>
+
                                 <option value="GRADIENT">Gradient/Solid</option>
                                 <option value="IMAGE">Full Graphic BG</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>Background Value (Color/URL)</label>
+                            <label>Background Value (Color/Path/URL)</label>
                             <input
                                 type="text"
-                                value={newTheme.type === 'IMAGE' ? newTheme.imageUrl : newTheme.value}
+                                value={newTheme.type === 'IMAGE' ? (newTheme.imagePath || newTheme.imageUrl) : newTheme.value}
                                 onChange={e => setNewTheme({
                                     ...newTheme,
-                                    [newTheme.type === 'IMAGE' ? 'imageUrl' : 'value']: e.target.value
+                                    [newTheme.type === 'IMAGE' ? (e.target.value.includes('/') ? 'imagePath' : 'imageUrl') : 'value']: e.target.value
                                 })}
-                                placeholder={newTheme.type === 'IMAGE' ? "https://..." : "linear-gradient(...)"}
+                                placeholder={newTheme.type === 'IMAGE' ? "assets/themes/bg.jpg or https://..." : "linear-gradient(...)"}
                             />
                         </div>
+
                         <div className="form-group">
                             <label>Page BG Color (Fallback)</label>
                             <input
                                 type="color"
                                 value={newTheme.pageBackground}
                                 onChange={e => setNewTheme({ ...newTheme, pageBackground: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group span-2">
-                            <label>Shelf Frame Image URL (Premium Skins)</label>
-                            <input
-                                type="text"
-                                value={newTheme.frameImageUrl}
-                                onChange={e => setNewTheme({ ...newTheme, frameImageUrl: e.target.value })}
-                                placeholder="https://... (e.g. Wood Classic image)"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Frame Accent Color</label>
-                            <input
-                                type="color"
-                                value={newTheme.frameColor}
-                                onChange={e => setNewTheme({ ...newTheme, frameColor: e.target.value })}
                             />
                         </div>
                     </div>
@@ -101,14 +102,11 @@ const AdminThemes = () => {
                         <div
                             className="theme-preview"
                             style={{
-                                background: theme.type === 'IMAGE' ? `url(${theme.imageUrl}) center/cover` : theme.value,
-                                backgroundColor: theme.pageBackground || theme.value,
-                                border: theme.frameImageUrl ? 'none' : `3px solid ${theme.frameColor}`
+                                background: theme.type === 'IMAGE' ? `url(${resolveImg(theme)}) center/cover` : theme.value,
+                                backgroundColor: theme.pageBackground || theme.value
                             }}
+
                         >
-                            {theme.frameImageUrl && (
-                                <img src={theme.frameImageUrl} alt="" className="frame-preview-img" />
-                            )}
                             {theme.type === 'IMAGE' ? <ImageIcon size={20} className="type-icon" /> : <Palette size={20} className="type-icon" />}
                         </div>
 

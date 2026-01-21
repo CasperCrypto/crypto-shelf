@@ -1,9 +1,9 @@
 .shelf-cabinet-container {
     position: relative;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
-    padding: 40px;
+    padding: 30px;
     background: var(--theme-bg);
     background-image: var(--theme-img);
     background-size: cover;
@@ -32,32 +32,118 @@
 .cabinet-frame {
     position: relative;
     z-index: 1;
-    background: var(--cabinet-inner);
-    border: 12px solid var(--cabinet-wood);
+    background: rgba(0, 0, 0, 0.05);
+    /* Fallback subtle background */
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--border-radius-md);
     padding: 16px;
     width: 100%;
-    aspect-ratio: 2 / 2.5;
-    /* Adjusted for better designer image fit */
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.1);
+    aspect-ratio: 1 / 1.25;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.05), 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Designer CSS Skins */
+.cabinet-frame.skin-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+        0 8px 32px 0 rgba(31, 38, 135, 0.07),
+        inset 0 0 120px rgba(255, 255, 255, 0.15);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
+}
+
+.cabinet-frame.skin-holo {
+    background: linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.15), inset 0 0 60px rgba(255, 0, 255, 0.05);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
+}
+
+.cabinet-frame.skin-gold {
+    background: radial-gradient(circle at top left, #fff9c4 0%, #fbc02d 50%, #f9a825 100%);
+    border: 2px solid #ffeb3b;
+    box-shadow: 0 10px 40px rgba(251, 192, 45, 0.2), inset 0 0 80px rgba(255, 255, 255, 0.3);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
+}
+
+.cabinet-frame.skin-crystal {
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #e0f7fa 100%);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 0 50px rgba(178, 235, 242, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.8);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
+}
+
+.cabinet-frame.skin-mystic {
+    background: radial-gradient(circle at center, #1b5e20 0%, #000000 100%);
+    border: 2px solid #4ade80;
+    box-shadow: 0 0 40px rgba(74, 222, 128, 0.15), inset 0 0 60px rgba(0, 255, 0, 0.05);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
+}
+
+.cabinet-frame.skin-pink {
+    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+    border: 2px solid #f06292;
+    box-shadow: 0 10px 30px rgba(240, 98, 146, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.4);
+    padding: 24px;
+    aspect-ratio: 1 / 1.25;
 }
 
 .cabinet-frame.has-custom-frame {
     border: none;
     background: var(--frame-img) center/contain no-repeat;
+    background-color: transparent;
     box-shadow: none;
-    padding: 40px 30px;
-    /* Padding to keep items inside the visual frame */
+    padding: 18% 12% 12% 12%;
+    /* Calibrated for the new PNG assets */
+    aspect-ratio: 1 / 1;
 }
 
-.grid-2x4 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 15px;
-    /* Increased gap for better shelf sitting */
+.rows-container {
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
+
+.shelf-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    flex: 1;
+    gap: 8px;
+    padding-bottom: 0.5%;
+    /* Lowered to sit closer to the plank */
+    position: relative;
+}
+
+/* Specific Row Calibrations for gamer PNGs */
+.row-1 {
+    padding-top: 12%;
+    /* Significant push down to clear the arch */
+}
+
+/* Force top row items to have similar width to others */
+.row-1 .shelf-slot {
+    max-width: 25%;
+    flex: 0 0 25%;
+}
+
+.row-4 {
+    padding-bottom: 8%;
+    /* Extra room for the bottom plank garnish */
+}
+
+
+
 
 
 .shelf-owner-badge {

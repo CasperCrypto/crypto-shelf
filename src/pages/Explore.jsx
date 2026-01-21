@@ -8,7 +8,8 @@ import UserIdentity from '../components/UserIdentity';
 import './Explore.css';
 
 const Explore = () => {
-    const { accessories, themes, reactions } = useAppStore(); // Removed 'shelves' from store to use local state + DB
+    const { accessories, themes, skins, reactions } = useAppStore();
+
     const [dbShelves, setDbShelves] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -25,6 +26,8 @@ const Explore = () => {
     }, []);
 
     const getTheme = (id) => themes.find(t => t.id === id);
+    const getSkin = (id) => skins.find(s => s.id === id);
+
     const getReactionCount = (shelfId) => reactions.filter(r => r.shelfId === shelfId).length;
 
     // Filter logic (Client side for now)
@@ -59,38 +62,42 @@ const Explore = () => {
             </div>
 
             <div className="shelves-grid">
-                {dbShelves.length === 0 ? (
-                    <div className="empty-state">No shelves found. Be the first to build one!</div>
-                ) : (
-                    dbShelves.map(shelf => (
-                        <div key={shelf.id} className="shelf-card" onClick={() => navigate(`/shelf/${shelf.id}`)}>
-                            <div className="shelf-user-header">
-                                <UserIdentity
-                                    handle={shelf.user?.handle}
-                                    avatar={shelf.user?.avatar}
-                                    twitterHandle={shelf.user?.twitterHandle}
-                                    isVerified={shelf.user?.isVerified}
-                                    size="sm"
-                                />
-                            </div>
-                            <div className="shelf-preview-mini">
-                                <ShelfCabinet
-                                    shelf={{ ...shelf, theme: getTheme(shelf.themeId) }}
-                                    accessories={accessories}
-                                    readOnly={true}
-                                />
-                            </div>
-                            <div className="shelf-card-info">
-                                <div className="reactions-summary">
-                                    <div className="reaction-stat">
-                                        <Flame size={14} fill="var(--color-accent)" stroke="var(--color-accent)" />
-                                        <span>{shelf.totalReactions || 0} Total Reactions</span>
-                                    </div>
+                {dbShelves.filter(s => s && s.id).map(shelf => (
+                    <div key={shelf.id} className="shelf-card" onClick={() => navigate(`/shelf/${shelf.id}`)}>
+
+                        <div className="shelf-user-header">
+                            <UserIdentity
+                                handle={shelf.user?.handle}
+                                avatar={shelf.user?.avatar}
+                                twitterHandle={shelf.user?.twitterHandle}
+                                isVerified={shelf.user?.isVerified}
+                                size="sm"
+                            />
+                        </div>
+                        <div className="shelf-preview-mini">
+                            <ShelfCabinet
+                                shelf={{
+                                    ...shelf,
+                                    theme: getTheme(shelf.themeId),
+                                    skin: getSkin(shelf.skinId)
+                                }}
+
+                                accessories={accessories}
+                                readOnly={true}
+                            />
+                        </div>
+                        <div className="shelf-card-info">
+                            <div className="reactions-summary">
+                                <div className="reaction-stat">
+                                    <Flame size={14} fill="var(--color-accent)" stroke="var(--color-accent)" />
+                                    <span>{shelf.totalReactions || 0} Total Reactions</span>
                                 </div>
                             </div>
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
+
+
 
             </div>
         </div>

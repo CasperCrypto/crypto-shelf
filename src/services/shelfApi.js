@@ -31,7 +31,7 @@ export async function getShelfForUser(userId) {
     return { shelf: shelfData, items: itemsData || [] };
 }
 
-export async function saveShelfForUser(userId, { themeId, slots }) {
+export async function saveShelfForUser(userId, { themeId, skinId, slots }) {
     if (!userId || !supabase) return;
 
     // 1. Upsert Shelf
@@ -40,10 +40,12 @@ export async function saveShelfForUser(userId, { themeId, slots }) {
         .upsert({
             user_id: userId,
             theme_id: themeId,
+            skin_id: skinId,
             updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' }) // Assuming one shelf per user, strictly enforcing uniqueness on user_id might vary by schema but typical for "My Shelf"
+        }, { onConflict: 'user_id' })
         .select()
         .maybeSingle();
+
 
     if (shelfError || !shelfData) {
         console.error("Error saving shelf:", shelfError);
@@ -185,10 +187,12 @@ export async function getAllShelves() {
             id: shelf.id,
             userId: shelf.user_id,
             themeId: shelf.theme_id || 'dawn',
-            slots: Array.from({ length: 8 }).map((_, i) => {
+            skinId: shelf.skin_id || 'classic_wood',
+            slots: Array.from({ length: 15 }).map((_, i) => {
                 const item = shelf.items.find(item => item.slot_index === i);
                 return { index: i, itemId: item ? item.item_key : null };
             }),
+
             user: {
                 handle: shelf.profiles?.handle || 'Unknown',
                 avatar: shelf.profiles?.avatar_url || null,
@@ -223,10 +227,12 @@ export async function getShelfById(shelfId) {
         id: data.id,
         userId: data.user_id,
         themeId: data.theme_id || 'dawn',
+        skinId: data.skin_id || 'classic_wood',
         slots: Array.from({ length: 8 }).map((_, i) => {
             const item = data.items.find(item => item.slot_index === i);
             return { index: i, itemId: item ? item.item_key : null };
         }),
+
         user: {
             handle: data.profiles?.handle || 'Unknown',
             avatar: data.profiles?.avatar_url || null,
@@ -262,18 +268,39 @@ export async function getThemes() {
         console.error("Error fetching themes:", error);
         return [];
     }
-    return data.map(t => ({
+    return (data || []).filter(Boolean).map(t => ({
         id: t.id,
         name: t.name,
         type: t.type,
-        value: t.value,
-        frameColor: t.frame_color,
-        pageBackground: t.page_background,
-        imageUrl: t.image_url,
-        frameImageUrl: t.frame_image_url,
-        isActive: t.is_active
+        value: t.value || '',
+        pageBackground: t.page_background || t.pageBackground || '#f5f5f5',
+        imageUrl: t.image_url || t.imageUrl || '',
+        imagePath: t.image_path || t.imagePath || '',
+        isActive: t.is_active !== false
     }));
 }
+
+
+export async function getSkins() {
+    if (!supabase) return [];
+    const { data, error } = await supabase
+        .from('skins')
+        .select('*')
+        .eq('is_active', true);
+
+    if (error) {
+        console.error("Error fetching skins:", error);
+        return [];
+    }
+    return (data || []).filter(Boolean).map(s => ({
+        id: s.id,
+        name: s.name,
+        imageUrl: s.image_url || s.imageUrl || '',
+        imagePath: s.image_path || s.imagePath || '',
+        frameColor: s.frame_color || s.frameColor || '#8B5E3C'
+    }));
+}
+
 
 
 export async function saveTheme(theme) {
@@ -283,12 +310,12 @@ export async function saveTheme(theme) {
         name: theme.name,
         type: theme.type,
         value: theme.value,
-        frame_color: theme.frameColor,
         page_background: theme.pageBackground,
         image_url: theme.imageUrl,
-        frame_image_url: theme.frameImageUrl,
+        image_path: theme.imagePath,
         is_active: true
     };
+
 
     const { error } = await supabase
         .from('themes')
@@ -306,4 +333,35 @@ export async function deleteThemeFromDB(id) {
         .delete()
         .eq('id', id);
     if (error) console.error("Error deleting theme:", error);
+}
+
+export async function saveSkin(skin) {
+    if (!supabase) return;
+
+    const dbSkin = {
+        id: skin.id || skin.name.toLowerCase().replace(/\s+/g, '_'),
+        name: skin.name,
+        image_url: skin.imageUrl,
+        image_path: skin.imagePath,
+        frame_color: skin.frameColor,
+        is_active: true
+    };
+
+
+    const { error } = await supabase
+        .from('skins')
+        .upsert(dbSkin, { onConflict: 'id' });
+
+    if (error) {
+        console.error("Error saving skin:", error);
+    }
+}
+
+export async function deleteSkinFromDB(id) {
+    if (!supabase) return;
+    const { error } = await supabase
+        .from('skins')
+        .delete()
+        .eq('id', id);
+    if (error) console.error("Error deleting skin:", error);
 }

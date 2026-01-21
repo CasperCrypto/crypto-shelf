@@ -9,6 +9,8 @@ import Rankings from './pages/Rankings';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminAccessories from './pages/admin/AdminAccessories';
 import AdminThemes from './pages/admin/AdminThemes';
+import AdminSkins from './pages/admin/AdminSkins';
+
 import AdminModeration from './pages/admin/AdminModeration';
 import { useAppStore } from './AppContext';
 import { LayoutGrid, Compass, Trophy, User, ShieldCheck, LogOut } from 'lucide-react';
@@ -165,7 +167,9 @@ function App() {
               <Route index element={<div className="admin-welcome"><h2>Admin Dashboard</h2><p>Select a section to manage.</p></div>} />
               <Route path="accessories" element={<AdminAccessories />} />
               <Route path="themes" element={<AdminThemes />} />
+              <Route path="skins" element={<AdminSkins />} />
               <Route path="moderation" element={<AdminModeration />} />
+
             </Route>
           </Routes>
         </main>

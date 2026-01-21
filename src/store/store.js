@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { INITIAL_ACCESSORIES, INITIAL_THEMES, MOCK_SHELVES, MOCK_USERS } from './initialData';
-import { getAccessories, getThemes } from '../services/shelfApi';
+import { INITIAL_ACCESSORIES, INITIAL_THEMES, INITIAL_SKINS, MOCK_SHELVES, MOCK_USERS } from './initialData';
+import { getAccessories, getThemes, getSkins, saveTheme, deleteThemeFromDB, saveSkin, deleteSkinFromDB } from '../services/shelfApi';
+
+
 
 // Helper to load from localStorage
 const load = (key, defaultValue) => {
@@ -17,21 +19,65 @@ export const useStore = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [accessories, setAccessories] = useState(INITIAL_ACCESSORIES);
     const [themes, setThemes] = useState(INITIAL_THEMES);
+    const [skins, setSkins] = useState(INITIAL_SKINS);
     const [shelves, setShelves] = useState(load('shelves', MOCK_SHELVES));
+
     const [reactions, setReactions] = useState(load('reactions', []));
 
     // Fetch dynamic assets from Supabase on mount
     useEffect(() => {
         const fetchAssets = async () => {
-            const [accData, themeData] = await Promise.all([
-                getAccessories(),
-                getThemes()
-            ]);
-            if (accData.length > 0) setAccessories(accData);
-            if (themeData.length > 0) setThemes(themeData);
+            try {
+                const [accData, themeData, skinData] = await Promise.all([
+                    getAccessories(),
+                    getThemes(),
+                    getSkins()
+                ]);
+
+                if (accData && accData.length > 0) {
+                    const mappedAccs = accData.filter(Boolean).map(acc => ({
+                        ...acc,
+                        image: acc.image_url || acc.image || '' // Ensure image field exists
+                    }));
+                    setAccessories(mappedAccs);
+                } else {
+                    console.warn("No accessories found in DB (or empty), forcing defaults");
+                    setAccessories(INITIAL_ACCESSORIES);
+                }
+
+                if (themeData && themeData.length > 0) setThemes(themeData.filter(Boolean));
+
+                // Merge local INITIAL_SKINS with DB skins
+                setSkins(prev => {
+                    const combined = [...INITIAL_SKINS];
+                    if (skinData && skinData.length > 0) {
+                        skinData.filter(Boolean).forEach(dbSkin => {
+                            const index = combined.findIndex(s => s.id === dbSkin.id);
+                            const mappedDbSkin = {
+                                ...dbSkin,
+                                imagePath: dbSkin.image_path || dbSkin.imagePath || ''
+                            };
+                            if (index > -1) {
+                                // Overwrite local with DB if DB has image
+                                if (mappedDbSkin.imagePath || mappedDbSkin.image_url) {
+                                    combined[index] = { ...combined[index], ...mappedDbSkin };
+                                }
+                            } else {
+                                combined.push(mappedDbSkin);
+                            }
+                        });
+                    }
+                    return combined;
+                });
+            } catch (err) {
+                console.error("Failed to fetch assets, using defaults:", err);
+                setAccessories(INITIAL_ACCESSORIES);
+                setSkins(INITIAL_SKINS);
+            }
         };
         fetchAssets();
     }, []);
+
 
     // Persistence only for local/state-heavy items
     useEffect(() => save('shelves', shelves), [shelves]);
@@ -109,6 +155,18 @@ export const useStore = () => {
         await deleteThemeFromDB(id);
     };
 
+    const addSkin = async (skin) => {
+        const id = skin.id || skin.name.toLowerCase().replace(/\s+/g, '_');
+        setSkins(prev => [...prev, { ...skin, id }]);
+        await saveSkin(skin);
+    };
+
+    const deleteSkin = async (id) => {
+        setSkins(prev => prev.filter(s => s.id !== id));
+        await deleteSkinFromDB(id);
+    };
+
+
 
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
@@ -116,7 +174,10 @@ export const useStore = () => {
         currentUser, setCurrentUser, logout,
         accessories, addAccessory, updateAccessory, deleteAccessory,
         themes, addTheme, updateTheme, deleteTheme,
+        skins, addSkin, deleteSkin, setSkins,
+
         shelves, saveShelf, toggleShelfStatus,
         reactions, addOrToggleReaction, getReactionsForShelf, getUserReactionsForShelf
     };
+
 };
