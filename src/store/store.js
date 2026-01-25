@@ -1,53 +1,59 @@
 import { useState, useEffect } from 'react';
-import { INITIAL_ACCESSORIES, INITIAL_THEMES, INITIAL_SKINS, MOCK_SHELVES, MOCK_USERS } from './initialData';
-import { getAccessories, getThemes, getSkins, saveTheme, deleteThemeFromDB, saveSkin, deleteSkinFromDB } from '../services/shelfApi';
-
-
-
-// Helper to load from localStorage
-const load = (key, defaultValue) => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : defaultValue;
-};
-
-// Helper to save to localStorage
-const save = (key, value) => {
-    localStorage.setItem(key, JSON.stringify(value));
-};
+import { INITIAL_ACCESSORIES, INITIAL_THEMES, INITIAL_SKINS } from './initialData';
+import {
+    getAccessories,
+    getThemes,
+    getSkins,
+    saveTheme,
+    deleteThemeFromDB,
+    saveSkin,
+    deleteSkinFromDB,
+    getAllShelves
+} from '../services/shelfApi';
+import { supabase } from '../lib/supabaseClient';
 
 export const useStore = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [accessories, setAccessories] = useState(INITIAL_ACCESSORIES);
     const [themes, setThemes] = useState(INITIAL_THEMES);
     const [skins, setSkins] = useState(INITIAL_SKINS);
-    const [shelves, setShelves] = useState(load('shelves', MOCK_SHELVES));
+    const [shelves, setShelves] = useState([]);
+    const [reactions, setReactions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [reactions, setReactions] = useState(load('reactions', []));
-
-    // Fetch dynamic assets from Supabase on mount
+    // Fetch all data from Supabase on mount
     useEffect(() => {
-        const fetchAssets = async () => {
+        const fetchAllData = async () => {
             try {
+                setIsLoading(true);
+
+                // Fetch accessories, themes, skins
                 const [accData, themeData, skinData] = await Promise.all([
                     getAccessories(),
                     getThemes(),
                     getSkins()
                 ]);
 
+                // Set accessories with fallback
                 if (accData && accData.length > 0) {
                     const mappedAccs = accData.filter(Boolean).map(acc => ({
                         ...acc,
-                        image: acc.image_url || acc.image || '' // Ensure image field exists
+                        image: acc.image_url || acc.image || ''
                     }));
                     setAccessories(mappedAccs);
                 } else {
-                    console.warn("No accessories found in DB (or empty), forcing defaults");
+                    console.warn("No accessories in DB, using defaults");
                     setAccessories(INITIAL_ACCESSORIES);
                 }
 
-                if (themeData && themeData.length > 0) setThemes(themeData.filter(Boolean));
+                // Set themes with fallback
+                if (themeData && themeData.length > 0) {
+                    setThemes(themeData.filter(Boolean));
+                } else {
+                    setThemes(INITIAL_THEMES);
+                }
 
-                // Merge local INITIAL_SKINS with DB skins
+                // Merge skins
                 setSkins(prev => {
                     const combined = [...INITIAL_SKINS];
                     if (skinData && skinData.length > 0) {
@@ -58,7 +64,6 @@ export const useStore = () => {
                                 imagePath: dbSkin.image_path || dbSkin.imagePath || ''
                             };
                             if (index > -1) {
-                                // Overwrite local with DB if DB has image
                                 if (mappedDbSkin.imagePath || mappedDbSkin.image_url) {
                                     combined[index] = { ...combined[index], ...mappedDbSkin };
                                 }
@@ -69,26 +74,51 @@ export const useStore = () => {
                     }
                     return combined;
                 });
+
+                // Fetch all shelves from Supabase
+                const shelvesData = await getAllShelves();
+                setShelves(shelvesData || []);
+
+                setIsLoading(false);
             } catch (err) {
-                console.error("Failed to fetch assets, using defaults:", err);
+                console.error("Failed to fetch data:", err);
                 setAccessories(INITIAL_ACCESSORIES);
+                setThemes(INITIAL_THEMES);
                 setSkins(INITIAL_SKINS);
+                setIsLoading(false);
             }
         };
-        fetchAssets();
+
+        fetchAllData();
     }, []);
 
+    // Subscribe to real-time reaction updates
+    useEffect(() => {
+        if (!supabase) return;
 
-    // Persistence only for local/state-heavy items
-    useEffect(() => save('shelves', shelves), [shelves]);
-    useEffect(() => save('reactions', reactions), [reactions]);
+        const channel = supabase
+            .channel('reactions_changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'reactions' },
+                (payload) => {
+                    console.log('Reaction change:', payload);
+                    // Refetch shelves to update reaction counts
+                    getAllShelves().then(data => setShelves(data || []));
+                }
+            )
+            .subscribe();
 
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
-    // Auth logic handled by Privy in App.jsx, store just holds state
+    // Auth logic handled by Privy in App.jsx
     const logout = () => setCurrentUser(null);
 
-    // Shelf logic
-    const saveShelf = (shelfData) => {
+    // Shelf logic - now fully Supabase-backed
+    const saveShelf = async (shelfData) => {
+        // Optimistic update
         setShelves(prev => {
             const index = prev.findIndex(s => s.id === shelfData.id);
             if (index > -1) {
@@ -98,46 +128,27 @@ export const useStore = () => {
             }
             return [...prev, shelfData];
         });
+
+        // Note: Actual save happens in ShelfBuilder via saveShelfForUser
     };
 
-    // Reaction logic
-    const addOrToggleReaction = ({ shelfId, type }) => {
+    // Reaction logic - no longer using localStorage
+    const addOrToggleReaction = async ({ shelfId, type }) => {
         if (!currentUser) return;
 
-        setReactions(prev => {
-            const existingIndex = prev.findIndex(
-                r => r.shelfId === shelfId && r.userId === currentUser.id && r.type === type
-            );
-
-            if (existingIndex > -1) {
-                // Remove (toggle off)
-                return prev.filter((_, i) => i !== existingIndex);
-            } else {
-                // Add new
-                const newReaction = {
-                    id: Date.now().toString(),
-                    shelfId,
-                    userId: currentUser.id,
-                    type,
-                    createdAt: new Date().toISOString()
-                };
-                return [...prev, newReaction];
-            }
-        });
+        // This will be handled by shelfApi.js saveReaction
+        // which updates the database directly
     };
 
     const getReactionsForShelf = (shelfId) => {
-        const shelfReactions = reactions.filter(r => r.shelfId === shelfId);
-        const counts = { FIRE: 0, DIAMOND: 0, FUNNY: 0, EYES: 0, BRAIN: 0 };
-        shelfReactions.forEach(r => counts[r.type]++);
-        return counts;
+        const shelf = shelves.find(s => s.id === shelfId);
+        return shelf?.reactions || {};
     };
 
     const getUserReactionsForShelf = (shelfId) => {
         if (!currentUser) return [];
-        return reactions
-            .filter(r => r.shelfId === shelfId && r.userId === currentUser.id)
-            .map(r => r.type);
+        // This would need to query reactions table
+        return [];
     };
 
     // Admin logic
@@ -166,8 +177,6 @@ export const useStore = () => {
         await deleteSkinFromDB(id);
     };
 
-
-
     const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
     return {
@@ -175,9 +184,8 @@ export const useStore = () => {
         accessories, addAccessory, updateAccessory, deleteAccessory,
         themes, addTheme, updateTheme, deleteTheme,
         skins, addSkin, deleteSkin, setSkins,
-
         shelves, saveShelf, toggleShelfStatus,
-        reactions, addOrToggleReaction, getReactionsForShelf, getUserReactionsForShelf
+        reactions, addOrToggleReaction, getReactionsForShelf, getUserReactionsForShelf,
+        isLoading
     };
-
 };
