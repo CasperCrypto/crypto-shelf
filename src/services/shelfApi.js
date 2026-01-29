@@ -188,7 +188,7 @@ export async function getAllShelves() {
             id: shelf.id,
             userId: shelf.user_id,
             themeId: shelf.theme_id || 'dawn',
-            skinId: shelf.skin_id || 'classic_wood',
+            skinId: shelf.skin_id || 'classic',
             isFeatured: shelf.is_featured || false,
             slots: Array.from({ length: 8 }).map((_, i) => {
                 const item = shelf.items.find(item => item.slot_index === i);
@@ -243,7 +243,7 @@ export async function getShelfById(shelfId) {
         id: data.id,
         userId: data.user_id,
         themeId: data.theme_id || 'dawn',
-        skinId: data.skin_id || 'classic_wood',
+        skinId: data.skin_id || 'classic',
         slots: Array.from({ length: 8 }).map((_, i) => {
             const item = data.items.find(item => item.slot_index === i);
             return { index: i, itemId: item ? item.item_key : null };

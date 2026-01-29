@@ -72,7 +72,7 @@ const ShelfBuilder = () => {
                         id: dbShelf.id,
                         userId: currentUser.id,
                         themeId: dbShelf.theme_id || 'dawn',
-                        skinId: dbShelf.skin_id || 'classic_wood',
+                        skinId: dbShelf.skin_id || 'classic',
 
 
                         slots,
@@ -89,7 +89,7 @@ const ShelfBuilder = () => {
                             id: `s-${currentUser.id}`,
                             userId: currentUser.id,
                             themeId: 'dawn',
-                            skinId: 'classic_wood',
+                            skinId: 'classic',
 
 
                             slots: Array.from({ length: 8 }).map((_, i) => ({ index: i, itemId: null })),

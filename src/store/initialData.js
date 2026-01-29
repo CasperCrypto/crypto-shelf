@@ -51,20 +51,20 @@ export const MOCK_SHELVES = [
     id: 's1',
     userId: 'u1',
     themeId: 'dawn',
-    slots: Array.from({ length: 15 }).map((_, i) => ({
+    slots: Array.from({ length: 8 }).map((_, i) => ({
       index: i,
       itemId: i < 5 ? ['btc', 'eth', 'arcade', 'penguin', 'pepe'][i] : null
     })),
     isFeatured: true,
-    skinId: 'classic_wood',
+    skinId: 'classic',
     reactions: { FIRE: 12, DIAMOND: 5, FUNNY: 2, EYES: 8, BRAIN: 1 }
   },
   {
     id: 's2',
     userId: 'u2',
     themeId: 'sky',
-    skinId: 'classic_wood',
-    slots: Array.from({ length: 15 }).map((_, i) => ({
+    skinId: 'classic',
+    slots: Array.from({ length: 8 }).map((_, i) => ({
       index: i,
       itemId: i < 3 ? ['pepe', 'doge', 'robot'][i] : null
     })),
