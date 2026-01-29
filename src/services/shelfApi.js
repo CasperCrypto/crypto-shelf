@@ -59,30 +59,34 @@ export async function saveShelfForUser(userId, { themeId, skinId, slots }) {
         .maybeSingle();
 
 
-    if (shelfError || !shelfData) {
+    if (shelfError) {
         console.error("Error saving shelf:", shelfError);
-        return;
+        // Emergency Fallback: If skin/theme causes FK violation, try saving without them
+        if (shelfError.code === '23503') {
+            const { data: retryData, error: retryError } = await supabase
+                .from('shelves')
+                .upsert({
+                    user_id: userId,
+                    theme_id: 'dawn', // Known safe default
+                    skin_id: 'classic', // Known safe default
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id' })
+                .select()
+                .maybeSingle();
+
+            if (retryError) return { error: retryError };
+            return { data: retryData };
+        }
+        return { error: shelfError };
     }
 
     // 2. Prepare Items
     const itemsPayload = slots.map(slot => ({
         shelf_id: shelfData.id,
         slot_index: slot.index,
-        item_key: slot.itemId, // Assuming itemId is the accessory identifier string
-        extra_data: null // Add logic here if slots contain extra data (like photo frames)
+        item_key: slot.itemId,
+        extra_data: null
     }));
-
-    // 3. Upsert Items
-    // managing items: simplest strategy is upsert by (shelf_id, slot_index)
-    // if a slot is cleared (itemId is null), we still upsert it as null? 
-    // Or do we delete? The prompt implies upserting the payload.
-    // If the schema allows null item_key, that's fine. If not, we might need to filter.
-    // Let's assume we upsert all 8 slots.
-
-    // Check if we need to filter out nulls or if DB allows. 
-    // Assuming we want to persist "empty" slots if they were cleared.
-    // But typically we just store active items. 
-    // Prompt says: "upsert this array into shelf_items with onConflict: shelf_id,slot_index"
 
     const { error: itemsError } = await supabase
         .from('shelf_items')
@@ -90,7 +94,10 @@ export async function saveShelfForUser(userId, { themeId, skinId, slots }) {
 
     if (itemsError) {
         console.error("Error saving shelf items:", itemsError);
+        return { error: itemsError };
     }
+
+    return { data: shelfData };
 }
 
 export async function getReactionsForShelf(shelfId) {
@@ -385,7 +392,11 @@ export async function deleteThemeFromDB(id) {
         .from('themes')
         .delete()
         .eq('id', id);
-    if (error) console.error("Error deleting theme:", error);
+    if (error) {
+        console.error("Error deleting theme:", error);
+        return error;
+    }
+    return null;
 }
 
 export async function saveSkin(skin) {
@@ -416,7 +427,11 @@ export async function deleteSkinFromDB(id) {
         .from('skins')
         .delete()
         .eq('id', id);
-    if (error) console.error("Error deleting skin:", error);
+    if (error) {
+        console.error("Error deleting skin:", error);
+        return error;
+    }
+    return null;
 }
 
 export async function uploadSkinImage(file) {

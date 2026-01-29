@@ -171,8 +171,13 @@ export const useStore = () => {
         // Note: Full update might be needed for DB save, currently simplified
     };
     const deleteTheme = async (id) => {
+        const previousThemes = [...themes];
         setThemes(prev => prev.filter(t => t.id !== id));
-        await deleteThemeFromDB(id);
+        const error = await deleteThemeFromDB(id);
+        if (error) {
+            setThemes(previousThemes);
+            alert(`Could not delete theme: ${error.message || 'Key is still in use'}`);
+        }
     };
 
     const addSkin = async (skin) => {
@@ -183,8 +188,13 @@ export const useStore = () => {
     };
 
     const deleteSkin = async (id) => {
+        const previousSkins = [...skins];
         setSkins(prev => prev.filter(s => s.id !== id));
-        await deleteSkinFromDB(id);
+        const error = await deleteSkinFromDB(id);
+        if (error) {
+            setSkins(previousSkins);
+            alert(`Could not delete skin: ${error.message || 'Key is still in use'}`);
+        }
     };
 
 

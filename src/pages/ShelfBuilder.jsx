@@ -106,6 +106,17 @@ const ShelfBuilder = () => {
         loadShelf();
     }, [currentUser, shelves]);
 
+    // AUTO-FIX: If skinId is invalid (e.g. classic_wood but DB has classic), fix it in state
+    useEffect(() => {
+        if (myShelf && skins.length > 0) {
+            const currentSkinExists = skins.some(s => s.id === myShelf.skinId);
+            if (!currentSkinExists && myShelf.skinId !== 'classic' && !myShelf.skinId?.startsWith('css-')) {
+                console.warn("Invalid skin detected in state, resetting to classic standard");
+                setMyShelf(prev => ({ ...prev, skinId: 'classic' }));
+            }
+        }
+    }, [skins, myShelf?.skinId]);
+
     if (!myShelf || loading) return <div className="loading">Loading your shelf...</div>;
 
     const handleSlotClick = (index) => {
@@ -154,13 +165,17 @@ const ShelfBuilder = () => {
         // Save locally to update UI immediately
         saveShelf(myShelf);
         // Persist to Supabase
-        await saveShelfForUser(currentUser.id, {
+        const result = await saveShelfForUser(currentUser.id, {
             themeId: myShelf.themeId,
             skinId: myShelf.skinId,
             slots: myShelf.slots
         });
 
-        alert("Shelf saved!");
+        if (result?.error) {
+            alert(`Heads up: Save had issues (${result.error.message}). I attempted to save a stable fallback version. Please refersh.`);
+        } else {
+            alert("Shelf saved!");
+        }
     };
 
     const currentTheme = themes.find(t => t.id === myShelf.themeId);
