@@ -2,6 +2,16 @@ import { supabase } from '../lib/supabaseClient';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
+const normalizeSkinId = (id) => {
+    if (!id || id === 'classic_wood') return 'classic';
+    return id;
+};
+
+const normalizeThemeId = (id) => {
+    if (!id) return 'dawn';
+    return id;
+};
+
 export async function getShelfForUser(userId) {
     if (!userId || !supabase) return { shelf: null, items: [] };
 
@@ -41,8 +51,8 @@ export async function saveShelfForUser(userId, { themeId, skinId, slots }) {
         .from('shelves')
         .upsert({
             user_id: userId,
-            theme_id: themeId,
-            skin_id: skinId,
+            theme_id: normalizeThemeId(themeId),
+            skin_id: normalizeSkinId(skinId),
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
         .select()
@@ -187,8 +197,8 @@ export async function getAllShelves() {
         return {
             id: shelf.id,
             userId: shelf.user_id,
-            themeId: shelf.theme_id || 'dawn',
-            skinId: shelf.skin_id || 'classic',
+            themeId: normalizeThemeId(shelf.theme_id),
+            skinId: normalizeSkinId(shelf.skin_id),
             isFeatured: shelf.is_featured || false,
             slots: Array.from({ length: 8 }).map((_, i) => {
                 const item = shelf.items.find(item => item.slot_index === i);
@@ -242,8 +252,8 @@ export async function getShelfById(shelfId) {
     return {
         id: data.id,
         userId: data.user_id,
-        themeId: data.theme_id || 'dawn',
-        skinId: data.skin_id || 'classic',
+        themeId: normalizeThemeId(data.theme_id),
+        skinId: normalizeSkinId(data.skin_id),
         slots: Array.from({ length: 8 }).map((_, i) => {
             const item = data.items.find(item => item.slot_index === i);
             return { index: i, itemId: item ? item.item_key : null };

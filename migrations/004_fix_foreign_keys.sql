@@ -23,3 +23,6 @@ ADD CONSTRAINT shelves_theme_id_fkey
 INSERT INTO public.skins (id, name, type, frame_color, image_path)
 VALUES ('classic', 'Classic Wood', 'IMAGE', '#8B5E3C', 'assets/skins/wood_shelf.png')
 ON CONFLICT (id) DO NOTHING;
+-- 4. Final Cleanup: Reset any invalid references to defaults
+UPDATE public.shelves SET skin_id = 'classic' WHERE skin_id NOT IN (SELECT id FROM public.skins);
+UPDATE public.shelves SET theme_id = 'dawn' WHERE theme_id NOT IN (SELECT id FROM public.themes);
