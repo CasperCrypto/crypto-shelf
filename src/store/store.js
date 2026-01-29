@@ -8,7 +8,9 @@ import {
     deleteThemeFromDB,
     saveSkin,
     deleteSkinFromDB,
-    getAllShelves
+    getAllShelves,
+    saveAccessory,
+    deleteAccessoryFromDB
 } from '../services/shelfApi';
 import { supabase } from '../lib/supabaseClient';
 
@@ -18,7 +20,7 @@ export const useStore = () => {
     const [themes, setThemes] = useState(INITIAL_THEMES);
     const [skins, setSkins] = useState(INITIAL_SKINS);
     const [shelves, setShelves] = useState([]);
-    const [reactions, setReactions] = useState([]);
+    const [reactions, setReactions] = useState([]); // Kept for API compatibility, though mainly handled via shelves.reactions
     const [isLoading, setIsLoading] = useState(true);
 
     // Fetch all data from Supabase on mount
@@ -36,11 +38,8 @@ export const useStore = () => {
 
                 // Set accessories with fallback
                 if (accData && accData.length > 0) {
-                    const mappedAccs = accData.filter(Boolean).map(acc => ({
-                        ...acc,
-                        image: acc.image_url || acc.image || ''
-                    }));
-                    setAccessories(mappedAccs);
+                    // Mapping is handled in getAccessories now
+                    setAccessories(accData);
                 } else {
                     console.warn("No accessories in DB, using defaults");
                     setAccessories(INITIAL_ACCESSORIES);
@@ -48,26 +47,29 @@ export const useStore = () => {
 
                 // Set themes with fallback
                 if (themeData && themeData.length > 0) {
+                    // Filter out any potential nulls
                     setThemes(themeData.filter(Boolean));
                 } else {
                     setThemes(INITIAL_THEMES);
                 }
 
                 // Merge skins
-                setSkins(prev => {
+                setSkins(() => {
                     const combined = [...INITIAL_SKINS];
                     if (skinData && skinData.length > 0) {
                         skinData.filter(Boolean).forEach(dbSkin => {
                             const index = combined.findIndex(s => s.id === dbSkin.id);
                             const mappedDbSkin = {
                                 ...dbSkin,
-                                imagePath: dbSkin.image_path || dbSkin.imagePath || ''
+                                imagePath: dbSkin.imagePath || dbSkin.image_path || ''
                             };
                             if (index > -1) {
-                                if (mappedDbSkin.imagePath || mappedDbSkin.image_url) {
+                                // Update existing local skin with DB data if available
+                                if (mappedDbSkin.imagePath || mappedDbSkin.imageUrl) {
                                     combined[index] = { ...combined[index], ...mappedDbSkin };
                                 }
                             } else {
+                                // Add new DB skin
                                 combined.push(mappedDbSkin);
                             }
                         });
@@ -113,12 +115,12 @@ export const useStore = () => {
         };
     }, []);
 
-    // Auth logic handled by Privy in App.jsx
+    // Auth logic handled by Privy in App.jsx but we keep simple state here
     const logout = () => setCurrentUser(null);
 
-    // Shelf logic - now fully Supabase-backed
+    // Shelf logic
     const saveShelf = async (shelfData) => {
-        // Optimistic update
+        // Optimistic update for UI smoothness
         setShelves(prev => {
             const index = prev.findIndex(s => s.id === shelfData.id);
             if (index > -1) {
@@ -128,39 +130,46 @@ export const useStore = () => {
             }
             return [...prev, shelfData];
         });
-
-        // Note: Actual save happens in ShelfBuilder via saveShelfForUser
+        // Note: Actual persistence happens in ShelfBuilder via saveShelfForUser which calls API directly.
+        // store updates are for local reflection.
     };
 
-    // Reaction logic - no longer using localStorage
-    const addOrToggleReaction = async ({ shelfId, type }) => {
-        if (!currentUser) return;
+    const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
-        // This will be handled by shelfApi.js saveReaction
-        // which updates the database directly
+    // Reaction stub functions (since logic moved to direct API mostly, but keeping for compatibility)
+    const addOrToggleReaction = async () => {
+        // Logic handled in component calling saveReaction
     };
-
     const getReactionsForShelf = (shelfId) => {
         const shelf = shelves.find(s => s.id === shelfId);
         return shelf?.reactions || {};
     };
+    const getUserReactionsForShelf = () => []; // Placeholder
 
-    const getUserReactionsForShelf = (shelfId) => {
-        if (!currentUser) return [];
-        // This would need to query reactions table
-        return [];
+    // Admin logic - Persistence
+    const addAccessory = async (acc) => {
+        const newAcc = { ...acc, id: Date.now().toString() };
+        setAccessories(prev => [...prev, newAcc]);
+        await saveAccessory(newAcc);
     };
-
-    // Admin logic
-    const addAccessory = (acc) => setAccessories(prev => [...prev, { ...acc, id: Date.now().toString() }]);
-    const updateAccessory = (acc) => setAccessories(prev => prev.map(a => a.id === acc.id ? acc : a));
-    const deleteAccessory = (id) => setAccessories(prev => prev.filter(a => a.id !== id));
+    const updateAccessory = async (acc) => {
+        setAccessories(prev => prev.map(a => a.id === acc.id ? acc : a));
+        await saveAccessory(acc);
+    };
+    const deleteAccessory = async (id) => {
+        setAccessories(prev => prev.filter(a => a.id !== id));
+        await deleteAccessoryFromDB(id);
+    };
 
     const addTheme = async (theme) => {
-        setThemes(prev => [...prev, { ...theme, id: Date.now().toString() }]);
-        await saveTheme(theme);
+        const newTheme = { ...theme, id: Date.now().toString() };
+        setThemes(prev => [...prev, newTheme]);
+        await saveTheme(newTheme);
     };
-    const updateTheme = (id, patch) => setThemes(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
+    const updateTheme = async (id, patch) => {
+        setThemes(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
+        // Note: Full update might be needed for DB save, currently simplified
+    };
     const deleteTheme = async (id) => {
         setThemes(prev => prev.filter(t => t.id !== id));
         await deleteThemeFromDB(id);
@@ -168,8 +177,9 @@ export const useStore = () => {
 
     const addSkin = async (skin) => {
         const id = skin.id || skin.name.toLowerCase().replace(/\s+/g, '_');
-        setSkins(prev => [...prev, { ...skin, id }]);
-        await saveSkin(skin);
+        const newSkin = { ...skin, id };
+        setSkins(prev => [...prev, newSkin]);
+        await saveSkin(newSkin);
     };
 
     const deleteSkin = async (id) => {
@@ -177,7 +187,6 @@ export const useStore = () => {
         await deleteSkinFromDB(id);
     };
 
-    const toggleShelfStatus = (id, field) => setShelves(prev => prev.map(s => s.id === id ? { ...s, [field]: !s[field] } : s));
 
     return {
         currentUser, setCurrentUser, logout,

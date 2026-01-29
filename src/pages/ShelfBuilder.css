@@ -97,7 +97,6 @@
 
 .theme-card {
     height: 100px;
-    /* Increased for better visibility */
     border-radius: var(--border-radius-md);
     position: relative;
     overflow: hidden;
@@ -109,9 +108,16 @@
     transition: all 0.2s ease;
 }
 
+.theme-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    border-color: #ddd;
+}
+
 .theme-card.active {
     border-color: var(--color-primary);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.2);
+    transform: scale(1.02);
 }
 
 .theme-card-frame {

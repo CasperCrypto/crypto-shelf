@@ -7,15 +7,41 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
 const resolveImg = (item) => {
     if (!item) return '';
-    if (item.imageUrl) return item.imageUrl;
-    if (item.imagePath && supabaseUrl) {
-        return `${supabaseUrl}/storage/v1/object/public/${item.imagePath}`;
+
+    // Check for local assets first
+    const localSkins = {
+        'classic': '/assets/skins/wood_shelf.png',
+        'gold': '/assets/skins/gold_shelf.png',
+        'pink': '/assets/skins/pink_shelf.png',
+        'mystic': '/assets/skins/mystic_shelf.png',
+        'diamond': '/assets/skins/ice_shelf.jpg'
+    };
+
+    if (localSkins[item.id]) return localSkins[item.id];
+
+    const imgUrl = item.imageUrl || item.image_url || '';
+    const imgPath = item.imagePath || item.image_path || '';
+
+    if (imgUrl) return imgUrl;
+
+    // Handle Supabase storage paths
+    if (imgPath && supabaseUrl && !imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+        return `${supabaseUrl}/storage/v1/object/public/assets/${imgPath}`;
     }
-    return '';
+
+    // Handle relative local paths
+    if (imgPath && (imgPath.startsWith('assets/') || imgPath.startsWith('/assets/'))) {
+        return imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
+    }
+
+    return imgPath || '';
 };
 
 
 const AdminSkins = () => {
+    const { skins, addSkin, deleteSkin } = useAppStore();
+    const [isAdding, setIsAdding] = useState(false);
+    const [newSkin, setNewSkin] = useState({ name: '', imageUrl: '', imagePath: '', frameColor: '#8B5E3C' });
     const [uploading, setUploading] = useState(false);
 
     const handleFileChange = async (e) => {

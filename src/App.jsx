@@ -10,6 +10,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminAccessories from './pages/admin/AdminAccessories';
 import AdminThemes from './pages/admin/AdminThemes';
 import AdminSkins from './pages/admin/AdminSkins';
+import AdminFeatured from './pages/admin/AdminFeatured';
 
 import AdminModeration from './pages/admin/AdminModeration';
 import { useAppStore } from './AppContext';
@@ -84,6 +85,16 @@ function App() {
     const initUser = async () => {
       if (ready && authenticated && privyUser) {
         // Map Privy user to App user
+
+
+
+
+
+
+
+
+
+
         const wallet = privyUser.wallet?.address;
         // Check both direct email auth and Google auth for email
         const email = privyUser.email?.address || privyUser.google?.email;
@@ -168,6 +179,7 @@ function App() {
               <Route path="accessories" element={<AdminAccessories />} />
               <Route path="themes" element={<AdminThemes />} />
               <Route path="skins" element={<AdminSkins />} />
+              <Route path="featured" element={<AdminFeatured />} />
               <Route path="moderation" element={<AdminModeration />} />
 
             </Route>

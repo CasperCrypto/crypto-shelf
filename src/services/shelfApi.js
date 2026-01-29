@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
 export async function getShelfForUser(userId) {
     if (!userId || !supabase) return { shelf: null, items: [] };
 
@@ -142,11 +144,11 @@ export async function saveReaction(shelfId, userId, type) {
 }
 
 
+
 export async function getAllShelves() {
     if (!supabase) return [];
 
-    // 1. Fetch shelves with profiles and items (These have stable relationships)
-    // We filter shelves where the associated profile is NOT hidden
+    // 1. Fetch shelves with profiles and items
     const { data: shelfData, error: shelfError } = await supabase
         .from('shelves')
         .select(`
@@ -157,13 +159,12 @@ export async function getAllShelves() {
         .eq('profiles.is_hidden', false)
         .order('created_at', { ascending: false });
 
-
     if (shelfError) {
         console.error("Error fetching all shelves:", shelfError);
         return [];
     }
 
-    // 2. Fetch all reactions separately (Avoids the schema cache/relationship error)
+    // 2. Fetch all reactions separately
     const { data: reactionData, error: reactionError } = await supabase
         .from('reactions')
         .select('shelf_id, type');
@@ -188,21 +189,36 @@ export async function getAllShelves() {
             userId: shelf.user_id,
             themeId: shelf.theme_id || 'dawn',
             skinId: shelf.skin_id || 'classic_wood',
+            isFeatured: shelf.is_featured || false,
             slots: Array.from({ length: 15 }).map((_, i) => {
                 const item = shelf.items.find(item => item.slot_index === i);
                 return { index: i, itemId: item ? item.item_key : null };
             }),
-
             user: {
                 handle: shelf.profiles?.handle || 'Unknown',
                 avatar: shelf.profiles?.avatar_url || null,
                 twitterHandle: shelf.profiles?.twitter_handle || null,
-                isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle)
+                isVerified: (shelf.profiles?.is_verified || !!shelf.profiles?.twitter_handle),
+                isHidden: shelf.profiles?.is_hidden || false
             },
             reactions: reactionCounts,
             totalReactions: shelfReactions.length
         };
     });
+}
+
+export async function updateShelfStatus(shelfId, updates) {
+    if (!supabase || !shelfId) return;
+
+    // updates could be { is_featured: true }
+    const { error } = await supabase
+        .from('shelves')
+        .update(updates)
+        .eq('id', shelfId);
+
+    if (error) {
+        console.error("Error updating shelf status:", error);
+    }
 }
 
 export async function getShelfById(shelfId) {
@@ -254,7 +270,34 @@ export async function getAccessories() {
         console.error("Error fetching accessories:", error);
         return [];
     }
-    return data;
+
+    // Map database columns to expected format
+    return (data || []).map(acc => {
+        let img = acc.image || acc.image_url || acc.image_path || '';
+
+        // Resolve Supabase path if needed
+        if (img && !img.startsWith('http') && !img.startsWith('/') && !img.startsWith('assets/')) {
+            if (supabaseUrl) {
+                img = `${supabaseUrl}/storage/v1/object/public/assets/${img}`;
+            }
+        } else if (img && img.startsWith('accessories/')) {
+            if (supabaseUrl) {
+                img = `${supabaseUrl}/storage/v1/object/public/assets/${img}`;
+            }
+        }
+
+        return {
+            id: acc.id,
+            name: acc.name,
+            category: acc.category,
+            rarity: acc.rarity,
+            image: img,
+            image_url: img,
+            image_path: acc.image_path || acc.image || '',
+            isActive: acc.is_active !== false,
+            isPhotoFrame: acc.is_photo_frame || false
+        };
+    });
 }
 
 export async function getThemes() {
@@ -383,4 +426,75 @@ export async function uploadSkinImage(file) {
     }
 
     return filePath;
+}
+
+export async function uploadAccessoryImage(file) {
+    if (!supabase || !file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `accessories/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+    if (uploadError) {
+        console.error("Error uploading accessory:", uploadError);
+        return null;
+    }
+
+    return filePath;
+}
+
+export async function uploadThemeImage(file) {
+    if (!supabase || !file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `themes/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(filePath, file);
+
+    if (uploadError) {
+        console.error("Error uploading theme:", uploadError);
+        return null;
+    }
+
+    return filePath;
+}
+
+export async function saveAccessory(accessory) {
+    if (!supabase) return;
+
+    const dbAccessory = {
+        id: accessory.id || Date.now().toString(),
+        name: accessory.name,
+        category: accessory.category,
+        rarity: accessory.rarity,
+        image: accessory.image, // Legacy column
+        image_url: accessory.imageUrl,
+        image_path: accessory.imagePath,
+        is_active: accessory.isActive !== false,
+        is_photo_frame: accessory.isPhotoFrame || false
+    };
+
+    const { error } = await supabase
+        .from('accessories')
+        .upsert(dbAccessory); // id is primary key
+
+    if (error) {
+        console.error("Error saving accessory:", error);
+    }
+}
+
+export async function deleteAccessoryFromDB(id) {
+    if (!supabase) return;
+    const { error } = await supabase
+        .from('accessories')
+        .delete()
+        .eq('id', id);
+    if (error) console.error("Error deleting accessory:", error);
 }

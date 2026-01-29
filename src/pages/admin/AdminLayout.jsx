@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Package, Palette, ShieldCheck, ChevronRight, Sparkles } from 'lucide-react';
+import { Package, Palette, ShieldCheck, ChevronRight, Sparkles, Star } from 'lucide-react';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
@@ -24,6 +24,9 @@ const AdminLayout = () => {
                     </Link>
                     <Link to="/admin/skins" className={isActive('skins') ? 'active' : ''}>
                         <Sparkles size={20} /> Shelf Skins <ChevronRight size={16} className="arrow" />
+                    </Link>
+                    <Link to="/admin/featured" className={isActive('featured') ? 'active' : ''}>
+                        <Star size={20} /> Featured Shelves <ChevronRight size={16} className="arrow" />
                     </Link>
                     <Link to="/admin/moderation" className={isActive('moderation') ? 'active' : ''}>
                         <ShieldCheck size={20} /> Moderation <ChevronRight size={16} className="arrow" />
