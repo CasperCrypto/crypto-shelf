@@ -7,7 +7,6 @@
     z-index: 10;
     pointer-events: auto;
     background: transparent !important;
-    /* Force transparency */
     border: none !important;
     box-shadow: none !important;
 }
@@ -31,9 +30,9 @@
 }
 
 .item-image {
-    width: 65%;
-    /* Further reduced to look proportional */
-    height: 65%;
+    width: 85%;
+    /* Increased from 65% for better visibility */
+    height: 85%;
     object-fit: contain;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
