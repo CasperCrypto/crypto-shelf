@@ -32,8 +32,8 @@ const ShelfCabinet = ({ shelf, items, accessories, onSlotClick, readOnly = false
         if (imgUrl) {
             return imgUrl.replace('jylfjrjrvpuxyqyqyqyq', 'jylfjrjrvpuxyqyqyq');
         }
-        if (imgPath && supabaseUrl) {
-            return `${supabaseUrl}/storage/v1/object/public/${imgPath}`;
+        if (imgPath && supabaseUrl && !imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+            return `${supabaseUrl}/storage/v1/object/public/assets/${imgPath}`;
         }
         // Fallback for relative paths already in path format
         if (imgPath && (imgPath.startsWith('assets/') || imgPath.startsWith('/assets/'))) {
@@ -56,7 +56,7 @@ const ShelfCabinet = ({ shelf, items, accessories, onSlotClick, readOnly = false
     };
 
 
-    const SLOT_STRUCTURE = [3, 4, 4, 4]; // 15 slots
+    const SLOT_STRUCTURE = [2, 2, 2, 2]; // 8 slots (2x4 grid as requested)
     let slotOffset = 0;
 
     // Determine cabinet classes

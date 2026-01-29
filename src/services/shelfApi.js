@@ -190,7 +190,7 @@ export async function getAllShelves() {
             themeId: shelf.theme_id || 'dawn',
             skinId: shelf.skin_id || 'classic_wood',
             isFeatured: shelf.is_featured || false,
-            slots: Array.from({ length: 15 }).map((_, i) => {
+            slots: Array.from({ length: 8 }).map((_, i) => {
                 const item = shelf.items.find(item => item.slot_index === i);
                 return { index: i, itemId: item ? item.item_key : null };
             }),

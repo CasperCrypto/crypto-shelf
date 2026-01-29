@@ -63,7 +63,7 @@ const ShelfBuilder = () => {
 
                 if (dbShelf) {
                     // Reconstruct shelf from DB data
-                    const slots = Array.from({ length: 15 }).map((_, i) => {
+                    const slots = Array.from({ length: 8 }).map((_, i) => {
                         const item = dbItems.find(item => item.slot_index === i);
                         return { index: i, itemId: item ? item.item_key : null };
                     });
@@ -92,7 +92,7 @@ const ShelfBuilder = () => {
                             skinId: 'classic_wood',
 
 
-                            slots: Array.from({ length: 15 }).map((_, i) => ({ index: i, itemId: null })),
+                            slots: Array.from({ length: 8 }).map((_, i) => ({ index: i, itemId: null })),
                             reactions: {},
                             user: currentUser
                         };
@@ -140,7 +140,7 @@ const ShelfBuilder = () => {
 
 
     const randomizeShelf = () => {
-        const randomSlots = Array.from({ length: 15 }).map((_, i) => {
+        const randomSlots = Array.from({ length: 8 }).map((_, i) => {
             const activeAccs = accessories.filter(a => a.isActive && !a.isPhotoFrame);
             if (activeAccs.length === 0) return { index: i, itemId: null };
 

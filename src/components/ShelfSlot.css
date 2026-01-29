@@ -1,21 +1,25 @@
 .shelf-slot {
     position: relative;
     width: 100%;
-    aspect-ratio: 1;
+    height: 100%;
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
-    /* Ensure it floats above potential overlays */
     pointer-events: auto;
+    background: transparent !important;
+    /* Force transparency */
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .shelf-slot:hover:not(.read-only) {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
 .slot-inner {
     position: absolute;
-    bottom: 12px;
+    bottom: 5%;
+    /* Closer to the plank */
     left: 0;
     right: 0;
     top: 0;
@@ -23,17 +27,19 @@
     align-items: center;
     justify-content: center;
     z-index: 2;
+    background: transparent !important;
 }
 
 .item-image {
-    width: 80%;
-    height: 80%;
+    width: 65%;
+    /* Further reduced to look proportional */
+    height: 65%;
     object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
 .empty .plus-icon {
-    color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.2);
     transition: color 0.2s ease;
 }
 
@@ -44,12 +50,13 @@
 .slot-base {
     position: absolute;
     bottom: 0;
-    left: 5%;
-    right: 5%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.1);
+    left: 15%;
+    right: 15%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.08);
+    /* Fainter shadow */
     border-radius: 50%;
-    filter: blur(2px);
+    filter: blur(3px);
     z-index: 1;
 }
 

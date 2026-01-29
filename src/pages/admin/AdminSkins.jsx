@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../AppContext';
 import { Plus, Trash2, Sparkles } from 'lucide-react';
+import { uploadSkinImage } from '../../services/shelfApi';
 import './AdminSkins.css';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -50,7 +51,6 @@ const AdminSkins = () => {
 
         setUploading(true);
         try {
-            const { uploadSkinImage } = await import('../../services/shelfApi');
             const path = await uploadSkinImage(file);
             if (path) {
                 setNewSkin({ ...newSkin, imagePath: path });
@@ -150,8 +150,7 @@ const AdminSkins = () => {
                                 backgroundImage: `url(${resolveImg(skin)})`,
                                 backgroundSize: 'contain',
                                 backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
-                                backgroundColor: '#f5f5f5'
+                                backgroundRepeat: 'no-repeat'
                             }}
 
                         >
